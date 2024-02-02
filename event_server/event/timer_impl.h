@@ -4,7 +4,7 @@
 
 #include "timer.h"
 
-// #include "source/common/common/scope_tracker.h"
+#include "scoped_tracker_object.h"
 #include "event_impl_base.h"
 #include "libevent.h"
 
@@ -70,7 +70,7 @@ private:
   // This has to be atomic for alarms which are handled out of thread, for
   // example if the DispatcherImpl::post is called by two threads, they race to
   // both set this to null.
-  //std::atomic<const ScopeTrackedObject*> object_{};
+  std::atomic<const ScopeTrackedObject*> object_{};
 };
 
 } // namespace Event

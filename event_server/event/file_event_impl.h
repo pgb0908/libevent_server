@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-#include "envoy/event/file_event.h"
+#include "file_event.h"
 
-#include "source/common/event/dispatcher_impl.h"
-#include "source/common/event/event_impl_base.h"
+#include "dispatcher_impl.h"
+#include "event_impl_base.h"
 
 namespace Envoy {
 namespace Event {
@@ -16,7 +16,7 @@ namespace Event {
  */
 class FileEventImpl : public FileEvent, ImplBase {
 public:
-  FileEventImpl(DispatcherImpl& dispatcher, os_fd_t fd, FileReadyCb cb, FileTriggerType trigger,
+  FileEventImpl(DispatcherImpl& dispatcher, int fd, FileReadyCb cb, FileTriggerType trigger,
                 uint32_t events);
 
   // Event::FileEvent
@@ -32,7 +32,7 @@ private:
 
   Dispatcher& dispatcher_;
   FileReadyCb cb_;
-  os_fd_t fd_;
+  int fd_;
   FileTriggerType trigger_;
   // Enabled events for this fd.
   uint32_t enabled_events_;

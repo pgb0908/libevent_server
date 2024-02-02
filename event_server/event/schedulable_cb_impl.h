@@ -1,9 +1,9 @@
 #pragma once
 
-#include "envoy/event/schedulable_cb.h"
+#include "schedulable_cb.h"
 
-#include "source/common/event/event_impl_base.h"
-#include "source/common/event/libevent.h"
+#include "event_impl_base.h"
+#include "libevent.h"
 
 namespace Envoy {
 namespace Event {

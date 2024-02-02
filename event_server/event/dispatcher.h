@@ -6,55 +6,27 @@
 #include <string>
 #include <vector>
 
-#include "envoy/common/scope_tracker.h"
-#include "envoy/common/time.h"
-#include "envoy/config/core/v3/resolver.pb.h"
-#include "envoy/config/core/v3/udp_socket_config.pb.h"
-#include "envoy/event/dispatcher_thread_deletable.h"
-#include "envoy/event/file_event.h"
-#include "envoy/event/scaled_timer.h"
-#include "envoy/event/schedulable_cb.h"
-#include "envoy/event/signal.h"
-#include "envoy/event/timer.h"
-#include "envoy/filesystem/watcher.h"
-#include "envoy/network/connection.h"
-#include "envoy/network/connection_handler.h"
-#include "envoy/network/dns.h"
-#include "envoy/network/listen_socket.h"
-#include "envoy/network/listener.h"
-#include "envoy/network/transport_socket.h"
-#include "envoy/server/overload/thread_local_overload_state.h"
-#include "envoy/server/watchdog.h"
-#include "envoy/stats/scope.h"
-#include "envoy/stats/stats_macros.h"
-#include "envoy/stream_info/stream_info.h"
-#include "envoy/thread/thread.h"
+#include "scope_tracker.h"
+#include "time.h"
+#include "dispatcher_thread_deletable.h"
+#include "file_event.h"
+#include "scaled_timer.h"
+#include "schedulable_cb.h"
+#include "signal.h"
+#include "timer.h"
 
-#include "absl/functional/any_invocable.h"
+#include "functional"
+#include "deferred_deletable.h"
 
 namespace Envoy {
 namespace Event {
 
-/**
- * All dispatcher stats. @see stats_macros.h
- */
-#define ALL_DISPATCHER_STATS(HISTOGRAM)                                                            \
-  HISTOGRAM(loop_duration_us, Microseconds)                                                        \
-  HISTOGRAM(poll_delay_us, Microseconds)
-
-/**
- * Struct definition for all dispatcher stats. @see stats_macros.h
- */
-struct DispatcherStats {
-  ALL_DISPATCHER_STATS(GENERATE_HISTOGRAM_STRUCT)
-};
-
-using DispatcherStatsPtr = std::unique_ptr<DispatcherStats>;
 
 /**
  * Callback invoked when a dispatcher post() runs.
  */
-using PostCb = absl::AnyInvocable<void()>;
+// using PostCb = absl::AnyInvocable<void()>;
+using PostCb = std::function<void()>;
 
 using PostCbSharedPtr = std::shared_ptr<PostCb>;
 
@@ -126,7 +98,7 @@ public:
    * @param events supplies a logical OR of FileReadyType events that the file event should
    *               initially listen on.
    */
-  virtual FileEventPtr createFileEvent(os_fd_t fd, FileReadyCb cb, FileTriggerType trigger,
+  virtual FileEventPtr createFileEvent(int fd, FileReadyCb cb, FileTriggerType trigger,
                                        uint32_t events) = 0 ;
 
   /**
@@ -163,8 +135,8 @@ public:
    * often to avoid spurious miss events when processing long callback queues.
    * @param min_touch_interval Touch interval for the watchdog.
    */
-  virtual void registerWatchdog(const Server::WatchDogSharedPtr& watchdog,
-                                std::chrono::milliseconds min_touch_interval) = 0 ;
+/*  virtual void registerWatchdog(const Server::WatchDogSharedPtr& watchdog,
+                                std::chrono::milliseconds min_touch_interval) = 0 ;*/
 
   /**
    * Returns a time-source to use with this dispatcher.
@@ -184,8 +156,8 @@ public:
    * @param prefix the stats prefix to identify this dispatcher. If empty, the dispatcher will be
    *               identified by its name.
    */
-  virtual void initializeStats(Stats::Scope& scope,
-                               const absl::optional<std::string>& prefix = absl::nullopt) = 0 ;
+/*  virtual void initializeStats(Stats::Scope& scope,
+                               const absl::optional<std::string>& prefix = absl::nullopt) = 0 ;*/
 
   /**
    * Clears any items in the deferred deletion queue.
@@ -200,10 +172,10 @@ public:
    * @param stream_info info object for the server connection
    * @return Network::ConnectionPtr a server connection that is owned by the caller.
    */
-  virtual Network::ServerConnectionPtr
+/*  virtual Network::ServerConnectionPtr
   createServerConnection(Network::ConnectionSocketPtr&& socket,
                          Network::TransportSocketPtr&& transport_socket,
-                         StreamInfo::StreamInfo& stream_info) = 0 ;
+                         StreamInfo::StreamInfo& stream_info) = 0 ;*/
 
   /**
    * Creates an instance of Envoy's Network::ClientConnection. Does NOT initiate the connection;
@@ -216,17 +188,17 @@ public:
    * @param transport socket options used to create the transport socket.
    * @return Network::ClientConnectionPtr a client connection that is owned by the caller.
    */
-  virtual Network::ClientConnectionPtr createClientConnection(
+/*  virtual Network::ClientConnectionPtr createClientConnection(
       Network::Address::InstanceConstSharedPtr address,
       Network::Address::InstanceConstSharedPtr source_address,
       Network::TransportSocketPtr&& transport_socket,
       const Network::ConnectionSocket::OptionsSharedPtr& options,
-      const Network::TransportSocketOptionsConstSharedPtr& transport_options) = 0 ;
+      const Network::TransportSocketOptionsConstSharedPtr& transport_options) = 0 ;*/
 
   /**
    * @return Filesystem::WatcherPtr a filesystem watcher owned by the caller.
    */
-  virtual Filesystem::WatcherPtr createFilesystemWatcher() = 0 ;
+ // virtual Filesystem::WatcherPtr createFilesystemWatcher() = 0 ;
 
   /**
    * Submits an item for deferred delete. @see DeferredDeletable.
@@ -246,7 +218,7 @@ public:
    * @param cb supplies the callback to invoke when the signal fires.
    * @return SignalEventPtr a signal event that is owned by the caller.
    */
-  virtual SignalEventPtr listenForSignal(signal_t signal_num, SignalCb cb) = 0 ;
+  virtual SignalEventPtr listenForSignal(int signal_num, SignalCb cb) = 0 ;
 
   /**
    * Post the deletable to this dispatcher. The deletable objects are guaranteed to be destroyed on
@@ -275,7 +247,7 @@ public:
    * Returns a factory which connections may use for watermark buffer creation.
    * @return the watermark buffer factory for this dispatcher.
    */
-  virtual Buffer::WatermarkFactory& getWatermarkFactory() = 0 ;
+  // virtual Buffer::WatermarkFactory& getWatermarkFactory() = 0 ;
 
   /**
    * Updates approximate monotonic time to current value.

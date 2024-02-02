@@ -3,7 +3,6 @@
 #include <functional>
 #include <memory>
 
-#include "envoy/common/= 0 .h"
 
 namespace Envoy {
 namespace Event {

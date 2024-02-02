@@ -2,11 +2,11 @@
 
 #include <functional>
 
-#include "envoy/event/dispatcher.h"
-#include "envoy/event/schedulable_cb.h"
-#include "envoy/event/timer.h"
+#include "dispatcher.h"
+#include "schedulable_cb.h"
+#include "timer.h"
 
-#include "source/common/event/libevent.h"
+#include "libevent.h"
 
 #include "event2/event.h"
 #include "event2/watch.h"
@@ -97,7 +97,7 @@ public:
    * Start writing stats once thread-local storage is ready to receive them (see
    * ThreadLocalStoreImpl::initializeThreading).
    */
-  void initializeStats(DispatcherStats* stats);
+  //void initializeStats(DispatcherStats* stats);
 
 private:
   static void onPrepareForCallback(evwatch*, const evwatch_prepare_cb_info* info, void* arg);
@@ -115,7 +115,7 @@ private:
   }
 
   Libevent::BasePtr libevent_;
-  DispatcherStats* stats_{}; // stats owned by the containing DispatcherImpl
+ // DispatcherStats* stats_{}; // stats owned by the containing DispatcherImpl
   bool timeout_set_{};       // whether there is a poll timeout in the current event loop iteration
   timeval timeout_{};        // the poll timeout for the current event loop iteration, if available
   timeval prepare_time_{};   // timestamp immediately before polling

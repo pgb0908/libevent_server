@@ -1,31 +1,27 @@
-#include "source/common/event/file_event_impl.h"
+#include "file_event_impl.h"
 
 #include <cstdint>
 
-#include "source/common/common/assert.h"
-#include "source/common/event/dispatcher_impl.h"
+#include "dispatcher_impl.h"
 
 #include "event2/event.h"
 
 namespace Envoy {
 namespace Event {
 
-FileEventImpl::FileEventImpl(DispatcherImpl& dispatcher, os_fd_t fd, FileReadyCb cb,
+FileEventImpl::FileEventImpl(DispatcherImpl& dispatcher, int fd, FileReadyCb cb,
                              FileTriggerType trigger, uint32_t events)
     : dispatcher_(dispatcher), cb_(cb), fd_(fd), trigger_(trigger), enabled_events_(events),
       activation_cb_(dispatcher.createSchedulableCallback([this]() {
-        ASSERT(injected_activation_events_ != 0);
+        ////ASSERT(injected_activation_events_ != 0);
         mergeInjectedEventsAndRunCb(0);
       })) {
   // Treat the lack of a valid fd (which in practice should only happen if we run out of FDs) as
   // an OOM condition and just crash.
-  RELEASE_ASSERT(SOCKET_VALID(fd), "");
-#ifdef WIN32
-  ASSERT(trigger_ != FileTriggerType::Edge, "libevent does not support edge triggers on Windows");
-#endif
+  //RELEASE_//ASSERT(SOCKET_VALID(fd), "");
+
   if constexpr (PlatformDefaultTriggerType != FileTriggerType::EmulatedEdge) {
-    ASSERT(trigger_ != FileTriggerType::EmulatedEdge,
-           "Cannot use EmulatedEdge events if they are not the default platform type");
+    //ASSERT(trigger_ != FileTriggerType::EmulatedEdge,"Cannot use EmulatedEdge events if they are not the default platform type");
   }
 
   assignEvents(events, &dispatcher.base());
@@ -33,28 +29,28 @@ FileEventImpl::FileEventImpl(DispatcherImpl& dispatcher, os_fd_t fd, FileReadyCb
 }
 
 void FileEventImpl::activate(uint32_t events) {
-  ASSERT(dispatcher_.isThreadSafe());
+  ////ASSERT(dispatcher_.isThreadSafe());
 
   // events is not empty.
-  ASSERT(events != 0);
+  ////ASSERT(events != 0);
   // Only supported event types are set.
-  ASSERT((events & (FileReadyType::Read | FileReadyType::Write | FileReadyType::Closed)) == events);
+  ////ASSERT((events & (FileReadyType::Read | FileReadyType::Write | FileReadyType::Closed)) == events);
 
   // Schedule the activation callback so it runs as part of the next loop iteration if it is not
   // already scheduled.
   if (injected_activation_events_ == 0) {
-    ASSERT(!activation_cb_->enabled());
+    ////ASSERT(!activation_cb_->enabled());
     activation_cb_->scheduleCallbackNextIteration();
   }
-  ASSERT(activation_cb_->enabled());
+  ////ASSERT(activation_cb_->enabled());
 
   // Merge new events with pending injected events.
   injected_activation_events_ |= events;
 }
 
 void FileEventImpl::assignEvents(uint32_t events, event_base* base) {
-  ASSERT(dispatcher_.isThreadSafe());
-  ASSERT(base != nullptr);
+  ////ASSERT(dispatcher_.isThreadSafe());
+  ////ASSERT(base != nullptr);
 
   enabled_events_ = events;
   event_assign(
@@ -78,14 +74,14 @@ void FileEventImpl::assignEvents(uint32_t events, event_base* base) {
           events |= FileReadyType::Closed;
         }
 
-        ASSERT(events != 0);
+        ////ASSERT(events != 0);
         event->mergeInjectedEventsAndRunCb(events);
       },
       this);
 }
 
 void FileEventImpl::updateEvents(uint32_t events) {
-  ASSERT(dispatcher_.isThreadSafe());
+  ////ASSERT(dispatcher_.isThreadSafe());
   // The update can be skipped in cases where the old and new event mask are the same if the fd is
   // using Level or EmulatedEdge trigger modes, but not Edge trigger mode. When the fd is registered
   // in edge trigger mode, re-registering the fd will force re-computation of the readable/writable
@@ -105,7 +101,7 @@ void FileEventImpl::updateEvents(uint32_t events) {
 }
 
 void FileEventImpl::setEnabled(uint32_t events) {
-  ASSERT(dispatcher_.isThreadSafe());
+  ////ASSERT(dispatcher_.isThreadSafe());
   if (injected_activation_events_ != 0) {
     // Clear pending events on updates to the fd event mask to avoid delivering events that are no
     // longer relevant. Updating the event mask will reset the fd edge trigger state so the proxy
@@ -118,7 +114,7 @@ void FileEventImpl::setEnabled(uint32_t events) {
 }
 
 void FileEventImpl::unregisterEventIfEmulatedEdge(uint32_t event) {
-  ASSERT(dispatcher_.isThreadSafe());
+  //ASSERT(dispatcher_.isThreadSafe());
   // This constexpr if allows the compiler to optimize away the function on POSIX
   if constexpr (PlatformDefaultTriggerType == FileTriggerType::EmulatedEdge) {
     if (trigger_ == FileTriggerType::EmulatedEdge) {
@@ -129,10 +125,10 @@ void FileEventImpl::unregisterEventIfEmulatedEdge(uint32_t event) {
 }
 
 void FileEventImpl::registerEventIfEmulatedEdge(uint32_t event) {
-  ASSERT(dispatcher_.isThreadSafe());
+  //ASSERT(dispatcher_.isThreadSafe());
   // This constexpr if allows the compiler to optimize away the function on POSIX
   if constexpr (PlatformDefaultTriggerType == FileTriggerType::EmulatedEdge) {
-    ASSERT((event & (FileReadyType::Read | FileReadyType::Write)) == event);
+    //ASSERT((event & (FileReadyType::Read | FileReadyType::Write)) == event);
     if (trigger_ == FileTriggerType::EmulatedEdge) {
       auto new_event_mask = enabled_events_ | event;
       updateEvents(new_event_mask);
@@ -141,7 +137,7 @@ void FileEventImpl::registerEventIfEmulatedEdge(uint32_t event) {
 }
 
 void FileEventImpl::mergeInjectedEventsAndRunCb(uint32_t events) {
-  ASSERT(dispatcher_.isThreadSafe());
+  //ASSERT(dispatcher_.isThreadSafe());
   if (injected_activation_events_ != 0) {
     events |= injected_activation_events_;
     injected_activation_events_ = 0;

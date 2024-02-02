@@ -1,8 +1,7 @@
-#include "source/common/event/libevent_scheduler.h"
+#include "libevent_scheduler.h"
 
-#include "source/common/common/assert.h"
-#include "source/common/event/schedulable_cb_impl.h"
-#include "source/common/event/timer_impl.h"
+#include "schedulable_cb_impl.h"
+#include "timer_impl.h"
 
 #include "event2/util.h"
 
@@ -10,38 +9,27 @@ namespace Envoy {
 namespace Event {
 
 namespace {
-void recordTimeval(Stats::Histogram& histogram, const timeval& tv) {
+/*void recordTimeval(Stats::Histogram& histogram, const timeval& tv) {
   histogram.recordValue(tv.tv_sec * 1000000 + tv.tv_usec);
-}
+}*/
 } // namespace
 
 LibeventScheduler::LibeventScheduler() {
-#ifdef WIN32
-  event_config* event_config = event_config_new();
-  RELEASE_ASSERT(event_config != nullptr,
-                 "Failed to initialize libevent event_base: event_config_new");
-  // Request wepoll backend by avoiding win32 backend.
-  int error = event_config_avoid_method(event_config, "win32");
-  RELEASE_ASSERT(error == 0, "Failed to initialize libevent event_base: event_config_avoid_method");
-  event_base* event_base = event_base_new_with_config(event_config);
-  event_config_free(event_config);
-#else
   event_base* event_base = event_base_new();
-#endif
-  RELEASE_ASSERT(event_base != nullptr, "Failed to initialize libevent event_base");
+  //RELEASE_//ASSERT(event_base != nullptr, "Failed to initialize libevent event_base");
   libevent_ = Libevent::BasePtr(event_base);
 
   // The dispatcher won't work as expected if libevent hasn't been configured to use threads.
-  RELEASE_ASSERT(Libevent::Global::initialized(), "");
+  //RELEASE_//ASSERT(Libevent::Global::initialized(), "");
 }
 
 TimerPtr LibeventScheduler::createTimer(const TimerCb& cb, Dispatcher& dispatcher) {
-  return std::make_unique<TimerImpl>(libevent_, cb, dispatcher);
+  return std::unique_ptr<TimerImpl>(new TimerImpl(libevent_, cb, dispatcher));
 };
 
 SchedulableCallbackPtr
 LibeventScheduler::createSchedulableCallback(const std::function<void()>& cb) {
-  return std::make_unique<SchedulableCallbackImpl>(libevent_, cb);
+  return std::unique_ptr<SchedulableCallbackImpl>(new SchedulableCallbackImpl(libevent_, cb));
 };
 
 void LibeventScheduler::run(Dispatcher::RunType mode) {
@@ -63,19 +51,19 @@ void LibeventScheduler::run(Dispatcher::RunType mode) {
 void LibeventScheduler::loopExit() { event_base_loopexit(libevent_.get(), nullptr); }
 
 void LibeventScheduler::registerOnPrepareCallback(OnPrepareCallback&& callback) {
-  ASSERT(callback);
-  ASSERT(!callback_);
+  //ASSERT(callback);
+  //ASSERT(!callback_);
 
   callback_ = std::move(callback);
   evwatch_prepare_new(libevent_.get(), &onPrepareForCallback, this);
 }
 
-void LibeventScheduler::initializeStats(DispatcherStats* stats) {
+/*void LibeventScheduler::initializeStats(DispatcherStats* stats) {
   stats_ = stats;
   // These are thread safe.
   evwatch_prepare_new(libevent_.get(), &onPrepareForStats, this);
   evwatch_check_new(libevent_.get(), &onCheckForStats, this);
-}
+}*/
 
 void LibeventScheduler::onPrepareForCallback(evwatch*, const evwatch_prepare_cb_info*, void* arg) {
   // `self` is `this`, passed in from evwatch_prepare_new.
@@ -100,7 +88,7 @@ void LibeventScheduler::onPrepareForStats(evwatch*, const evwatch_prepare_cb_inf
   if (self->check_time_.tv_sec != 0) {
     timeval delta;
     evutil_timersub(&self->prepare_time_, &self->check_time_, &delta);
-    recordTimeval(self->stats_->loop_duration_us_, delta);
+    //recordTimeval(self->stats_->loop_duration_us_, delta);
   }
 }
 
@@ -122,7 +110,7 @@ void LibeventScheduler::onCheckForStats(evwatch*, const evwatch_check_cb_info*, 
     // feeling saucy. Disregard negative delays in stats, since they don't indicate anything
     // particularly useful.
     if (delay.tv_sec >= 0) {
-      recordTimeval(self->stats_->poll_delay_us_, delay);
+      //recordTimeval(self->stats_->poll_delay_us_, delay);
     }
   }
 }

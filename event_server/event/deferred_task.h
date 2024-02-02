@@ -2,7 +2,8 @@
 
 #include <memory>
 
-#include "envoy/event/dispatcher.h"
+#include "dispatcher.h"
+#include "deferred_deletable.h"
 
 namespace Envoy {
 namespace Event {
@@ -15,6 +16,7 @@ class DeferredTaskUtil {
 private:
   class DeferredTask : public DeferredDeletable {
   public:
+      DeferredTask() = default;
     DeferredTask(std::function<void()>&& task) : task_(std::move(task)) {}
     ~DeferredTask() override { task_(); }
 
@@ -27,7 +29,8 @@ public:
    * Submits an item for run deferred delete.
    */
   static void deferredRun(Dispatcher& dispatcher, std::function<void()>&& func) {
-    dispatcher.deferredDelete(std::make_unique<DeferredTask>(std::move(func)));
+      std::unique_ptr<DeferredDeletable> deferredDeletable(new DeferredTask(std::move(func)));
+      dispatcher.deferredDelete(std::move(deferredDeletable));
   }
 };
 

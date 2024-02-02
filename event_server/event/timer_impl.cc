@@ -9,7 +9,7 @@ namespace Event {
 
 TimerImpl::TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Dispatcher& dispatcher)
     : cb_(cb), dispatcher_(dispatcher) {
-  //ASSERT(cb_);
+  ////ASSERT(cb_);
   evtimer_assign(
       &raw_event_, libevent.get(),
       [](evutil_socket_t, short, void* arg) -> void {
@@ -26,7 +26,7 @@ TimerImpl::TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Dispatcher& dispat
 }
 
 void TimerImpl::disableTimer() {
-  ASSERT(dispatcher_.isThreadSafe());
+  //ASSERT(dispatcher_.isThreadSafe());
   event_del(&raw_event_);
 }
 
@@ -44,14 +44,14 @@ void TimerImpl::enableHRTimer(const std::chrono::microseconds d,
 }
 
 void TimerImpl::internalEnableTimer(const timeval& tv, const ScopeTrackedObject* object) {
-  ASSERT(dispatcher_.isThreadSafe());
+  //ASSERT(dispatcher_.isThreadSafe());
   object_ = object;
 
   event_add(&raw_event_, &tv);
 }
 
 bool TimerImpl::enabled() {
-  ASSERT(dispatcher_.isThreadSafe());
+  //ASSERT(dispatcher_.isThreadSafe());
   return 0 != evtimer_pending(&raw_event_, nullptr);
 }
 

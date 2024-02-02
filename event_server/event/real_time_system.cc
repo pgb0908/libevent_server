@@ -1,9 +1,8 @@
-#include "source/common/event/real_time_system.h"
+#include "real_time_system.h"
 
 #include <chrono>
 
-#include "source/common/common/assert.h"
-#include "source/common/event/timer_impl.h"
+#include "timer_impl.h"
 
 namespace Envoy {
 namespace Event {
@@ -23,7 +22,7 @@ private:
 } // namespace
 
 SchedulerPtr RealTimeSystem::createScheduler(Scheduler& base_scheduler, CallbackScheduler&) {
-  return std::make_unique<RealScheduler>(base_scheduler);
+  return std::unique_ptr<RealScheduler>(new RealScheduler(base_scheduler));
 }
 
 } // namespace Event

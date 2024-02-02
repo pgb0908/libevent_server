@@ -3,6 +3,11 @@ project(libevent_server)
 
 set(CMAKE_CXX_STANDARD 11)
 
+find_package(Libevent REQUIRED)
+
+# Import Abseil's CMake targets
+find_package(absl REQUIRED)
+
 
 set(event_server_lib
         event_server/event/dispatcher_impl.cc
@@ -14,6 +19,7 @@ set(event_server_lib
         event_server/event/scaled_range_timer_manager_impl.cc
         event_server/event/schedulable_cb_impl.cc
         event_server/event/timer_impl.cc
+        event_server/event/signal_impl.cc
 )
 
 add_library(event ${event_server_lib})

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "envoy/event/timer.h"
+#include "timer.h"
 
-#include "source/common/common/utility.h"
+//#include "source/common/common/utility.h"
 
 namespace Envoy {
 namespace Event {
