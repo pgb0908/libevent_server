@@ -25,8 +25,7 @@ namespace Event {
 /**
  * Callback invoked when a dispatcher post() runs.
  */
-// using PostCb = absl::AnyInvocable<void()>;
-using PostCb = std::function<void()>;
+using PostCb = absl::AnyInvocable<void()>;
 
 using PostCbSharedPtr = std::shared_ptr<PostCb>;
 
