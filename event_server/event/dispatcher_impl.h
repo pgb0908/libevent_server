@@ -15,6 +15,9 @@
 #include "libevent.h"
 #include "libevent_scheduler.h"
 #include "scaled_range_timer_manager.h"
+#include "dispatcher_thread_deletable.h"
+#include "../thread/thread.h"
+
 //#include "source/common/signal/fatal_error_handler.h"
 
 
@@ -134,31 +137,31 @@ private:
   // dispatcher run loop is executing on. We allow run_tid_ to be empty for tests where we don't
   // invoke run().
   bool isThreadSafe() const override {
-    //return run_tid_.isEmpty() || run_tid_ == thread_factory_.currentThreadId();
+    return run_tid_.isEmpty() || run_tid_ == thread_factory_.currentThreadId();
       return true;
   }
 
   const std::string name_;
-  //Thread::ThreadFactory& thread_factory_;
+  Thread::ThreadFactory& thread_factory_;
   TimeSource& time_source_;
   //Filesystem::Instance& file_system_;
   std::string stats_prefix_;
   //DispatcherStatsPtr stats_;
-  //Thread::ThreadId run_tid_;
+  Thread::ThreadId run_tid_;
   //Buffer::WatermarkFactorySharedPtr buffer_factory_;
   LibeventScheduler base_scheduler_;
   SchedulerPtr scheduler_;
 
   SchedulableCallbackPtr thread_local_delete_cb_;
-  //Thread::MutexBasicLockable thread_local_deletable_lock_;
+  Thread::MutexBasicLockable thread_local_deletable_lock_;
   // `deletables_in_dispatcher_thread` must be destroyed last to allow other callbacks populate.
-  //std::list<DispatcherThreadDeletableConstPtr> deletables_in_dispatcher_thread_ ABSL_GUARDED_BY(thread_local_deletable_lock_);
+  std::list<DispatcherThreadDeletableConstPtr> deletables_in_dispatcher_thread_ ABSL_GUARDED_BY(thread_local_deletable_lock_);
   bool shutdown_called_{false};
 
   SchedulableCallbackPtr deferred_delete_cb_;
 
   SchedulableCallbackPtr post_cb_;
-  //Thread::MutexBasicLockable post_lock_;
+  Thread::MutexBasicLockable post_lock_;
   std::list<PostCb> post_callbacks_; //ABSL_GUARDED_BY(post_lock_);
 
   std::vector<DeferredDeletablePtr> to_delete_1_;

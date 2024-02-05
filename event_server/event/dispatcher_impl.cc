@@ -8,7 +8,6 @@
 
 //#include "envoy/common/scope_tracker.h"
 
-
 #include "file_event_impl.h"
 #include "libevent_scheduler.h"
 #include "scaled_range_timer_manager_impl.h"
@@ -16,6 +15,8 @@
 #include "timer_impl.h"
 
 #include "event2/event.h"
+#include "../thread/thread_interface.h"
+#include "../thread/lock_guard.h"
 
 
 namespace Envoy {
@@ -226,7 +227,7 @@ SignalEventPtr DispatcherImpl::listenForSignal(int signal_num, SignalCb cb) {
 void DispatcherImpl::post(PostCb callback) {
   bool do_post;
   {
-    //Thread::LockGuard lock(post_lock_);
+    Thread::LockGuard lock(post_lock_);
     do_post = post_callbacks_.empty();
     post_callbacks_.push_back(std::move(callback));
   }
@@ -239,7 +240,7 @@ void DispatcherImpl::post(PostCb callback) {
 void DispatcherImpl::deleteInDispatcherThread(DispatcherThreadDeletableConstPtr deletable) {
   bool need_schedule;
   {
-    //Thread::LockGuard lock(thread_local_deletable_lock_);
+    Thread::LockGuard lock(thread_local_deletable_lock_);
     need_schedule = deletables_in_dispatcher_thread_.empty();
     deletables_in_dispatcher_thread_.emplace_back(std::move(deletable));
     // TODO(lambdai): Enable below after https://github.com/envoyproxy/envoy/issues/15072

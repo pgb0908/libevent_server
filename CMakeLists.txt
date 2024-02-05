@@ -8,6 +8,8 @@ find_package(Libevent REQUIRED)
 # Import Abseil's CMake targets
 find_package(absl REQUIRED)
 
+include_directories(${PROJECT_SOURCE_DIR})
+
 
 set(event_server_lib
         event_server/event/dispatcher_impl.cc
@@ -20,10 +22,14 @@ set(event_server_lib
         event_server/event/schedulable_cb_impl.cc
         event_server/event/timer_impl.cc
         event_server/event/signal_impl.cc
+        event_server/thread/thread.cc
 )
 
-add_library(event ${event_server_lib})
+add_library(event ${event_server_lib} )
+target_link_libraries(event PRIVATE
+        libevent::libevent
+        abseil::abseil
+)
 
 add_executable(libevent_server main.cpp)
-
-target_link_libraries(libevent_server event)
+target_link_libraries(libevent_server event )
