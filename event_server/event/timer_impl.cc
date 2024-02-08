@@ -18,7 +18,7 @@ TimerImpl::TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Dispatcher& dispat
           timer->cb_();
           return;
         }
-        //ScopeTrackerScopeState scope(timer->object_, timer->dispatcher_);
+        ScopeTrackerScopeState scope(timer->object_, timer->dispatcher_);
         timer->object_ = nullptr;
         timer->cb_();
       },
