@@ -47,7 +47,9 @@ public:
                  const ScaledRangeTimerManagerFactory& scaled_timer_factory,
                  const Buffer::WatermarkFactorySharedPtr& watermark_factory);*/
 
-    DispatcherImpl() = default;
+    DispatcherImpl(const std::string& name, Thread::ThreadFactory &threadFactory, TimeSource &timeSource,
+                   Event::TimeSystem& time_system,
+                   const ScaledRangeTimerManagerFactory& scaled_timer_factory);
   ~DispatcherImpl() override;
 
   /**

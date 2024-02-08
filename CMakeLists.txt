@@ -21,11 +21,10 @@ set(event_server_lib
         event_server/event/timer_impl.cc
         event_server/event/signal_impl.cc
         event_server/thread/thread.cc
+        event_server/thread/thread_impl.cc
 )
 
 add_executable(libevent_server main.cpp ${event_server_lib})
 
 
-target_link_libraries(libevent_server
-        libevent::libevent
-        abseil::abseil)
+target_link_libraries(libevent_server)

@@ -15,8 +15,8 @@
 #include "timer_impl.h"
 
 #include "event2/event.h"
-#include "../thread/thread_interface.h"
 #include "../thread/lock_guard.h"
+#include "../thread/thread_impl.h"
 
 
 namespace Envoy {
@@ -67,6 +67,26 @@ DispatcherImpl::DispatcherImpl(const std::string& name, Thread::ThreadFactory& t
   base_scheduler_.registerOnPrepareCallback(
       std::bind(&DispatcherImpl::updateApproximateMonotonicTime, this));
 }*/
+
+    DispatcherImpl::DispatcherImpl(const std::string& name,
+                                   Thread::ThreadFactory &threadFactory,
+                                   TimeSource &timeSource, Event::TimeSystem& time_system,
+                                   const ScaledRangeTimerManagerFactory& scaled_timer_factory) :
+            name_(name),
+            thread_factory_(threadFactory),
+            time_source_(timeSource),
+            scheduler_(time_system.createScheduler(base_scheduler_, base_scheduler_)),
+            thread_local_delete_cb_( base_scheduler_.createSchedulableCallback([this]() -> void { runThreadLocalDelete(); })),
+            deferred_delete_cb_(base_scheduler_.createSchedulableCallback(
+                    [this]() -> void { clearDeferredDeleteList(); })),
+            post_cb_(base_scheduler_.createSchedulableCallback([this]() -> void { runPostCallbacks(); })),
+            current_to_delete_(&to_delete_1_),
+            scaled_timer_manager_(scaled_timer_factory(*this))
+    {
+        updateApproximateMonotonicTimeInternal();
+        base_scheduler_.registerOnPrepareCallback(
+                std::bind(&DispatcherImpl::updateApproximateMonotonicTime, this));
+    }
 
 DispatcherImpl::~DispatcherImpl() {
   //ENVOY_LOG(debug, "destroying dispatcher {}", name_);
@@ -391,5 +411,7 @@ void DispatcherImpl::popTrackedObject(const ScopeTrackedObject* expected_object)
   //ASSERT(top == expected_object,"Popped the top of the tracked object stack, but it wasn't the expected object!");
 }
 
-} // namespace Event
+
+
+    } // namespace Event
 } // namespace Envoy
