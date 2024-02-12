@@ -13,6 +13,7 @@
 
 #include <stdio.h>  // snprintf
 #include <iostream>
+#include <csignal>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -60,14 +61,24 @@ void TcpServer::start()
   {
     //threadPool_->start(threadInitCallback_);
       assert(!acceptor_->listening());
-      dispatcher_->post([](){std::cout << "server is boot..." << std::endl;});
+
+      dispatcher_->post([](){
+          std::cout << "server is boot..." << std::endl;}
+          );
 
       //infinit_loop();
+
+      auto signalEvent = dispatcher_->listenForSignal(SIGINT, [this](){
+          std::cout << "signal found!!!!" << std::endl;
+          dispatcher_->exit();
+      });
 
       dispatcher_->post([this] {
           acceptor_->listen();
       });
-      dispatcher_->run(Envoy::Event::Dispatcher::RunType::RunUntilExit);
+
+
+      dispatcher_->run(Envoy::Event::Dispatcher::RunType::Block);
   }
 
 
@@ -99,6 +110,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
   conn->setWriteCompleteCallback(writeCompleteCallback_);
   conn->setCloseCallback(
       std::bind(&TcpServer::removeConnection, this, _1)); // FIXME: unsafe
+
   //ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 }
 
@@ -122,6 +134,7 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr& conn)
 
 void TcpServer::say_hello(){
     std::cout << " ------------------hello" << std::endl;
+    acceptor_->handleRead();
     infinit_loop();
 }
 

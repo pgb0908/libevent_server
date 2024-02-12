@@ -1,13 +1,15 @@
 #include "dispatcher_impl.h"
 #include "signal_impl.h"
 
+#include <utility>
+
 #include "event2/event.h"
 
 namespace Envoy {
 namespace Event {
 
 SignalEventImpl::SignalEventImpl(DispatcherImpl& dispatcher, int signal_num, SignalCb cb)
-    : cb_(cb) {
+    : cb_(std::move(cb)) {
   evsignal_assign(
       &raw_event_, &dispatcher.base(), signal_num,
       [](evutil_socket_t, short, void* arg) -> void { static_cast<SignalEventImpl*>(arg)->cb_(); },

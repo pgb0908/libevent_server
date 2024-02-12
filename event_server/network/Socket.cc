@@ -64,9 +64,14 @@ void Socket::bindAddress(const InetAddress& addr)
   sockets::bindOrDie(sockfd_, addr.getSockAddr());
 }
 
-void Socket::listen()
+bool Socket::listen()
 {
-  sockets::listenOrDie(sockfd_);
+  auto rtn = sockets::listenOrDie(sockfd_);
+  if(rtn < 0){
+      return false;
+  }
+
+  return true;
 }
 
 int Socket::accept(InetAddress* peeraddr)

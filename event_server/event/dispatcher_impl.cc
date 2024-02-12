@@ -390,7 +390,6 @@ void DispatcherImpl::runPostCallbacks() {
 }*/
 
 void DispatcherImpl::touchWatchdog() {
-    std::cout << "touchWatchdog" << std::endl;
 /*  if (watchdog_registration_) {
     watchdog_registration_->touchWatchdog();
   }*/

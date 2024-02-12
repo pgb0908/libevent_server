@@ -88,7 +88,7 @@ int sockets::createNonblockingOrDie(sa_family_t family)
   int sockfd = ::socket(family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
   if (sockfd < 0)
   {
-    // LOG_SYSFATAL << "sockets::createNonblockingOrDie";
+      std::cout  << "sockets::createNonblockingOrDie" << std::endl;
   }
 #endif
   return sockfd;
@@ -99,11 +99,11 @@ void sockets::bindOrDie(int sockfd, const struct sockaddr* addr)
   int ret = ::bind(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
   if (ret < 0)
   {
-    // LOG_SYSFATAL << "sockets::bindOrDie";
+      std::cout  << "sockets::bindOrDie" << std::endl;
   }
 }
 
-void sockets::listenOrDie(int sockfd)
+int sockets::listenOrDie(int sockfd)
 {
   int ret = ::listen(sockfd, SOMAXCONN);
   if (ret < 0)
@@ -111,6 +111,8 @@ void sockets::listenOrDie(int sockfd)
     // LOG_SYSFATAL << "sockets::listenOrDie";
     std::cout << "sockets::listenOrDie" << std::endl;
   }
+
+    return ret;
 }
 
 int sockets::accept(int sockfd, struct sockaddr_in6* addr)

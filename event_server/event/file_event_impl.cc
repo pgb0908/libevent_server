@@ -1,9 +1,7 @@
-#include "file_event_impl.h"
-
-#include <cstdint>
-#include <utility>
-
 #include "dispatcher_impl.h"
+
+#include "file_event_impl.h"
+#include <utility>
 
 #include "event2/event.h"
 
@@ -56,32 +54,32 @@ void FileEventImpl::assignEvents(uint32_t events, event_base* base) {
   ////ASSERT(dispatcher_.isThreadSafe());
   assert(base != nullptr);
 
-  enabled_events_ = events;
-  event_assign(
-      &raw_event_, base, fd_,
-      EV_PERSIST | (trigger_ == FileTriggerType::Edge ? EV_ET : 0) |
-          (events & FileReadyType::Read ? EV_READ : 0) |
-          (events & FileReadyType::Write ? EV_WRITE : 0) |
-          (events & FileReadyType::Closed ? EV_CLOSED : 0),
-      [](evutil_socket_t, short what, void* arg) -> void {
-        auto* event = static_cast<FileEventImpl*>(arg);
-        uint32_t events = 0;
-        if (what & EV_READ) {
-          events |= FileReadyType::Read;
-        }
+    enabled_events_ = events;
+    event_assign(
+            &raw_event_, base, fd_,
+            EV_PERSIST | (trigger_ == FileTriggerType::Edge ? EV_ET : 0) |
+            (events & FileReadyType::Read ? EV_READ : 0) |
+            (events & FileReadyType::Write ? EV_WRITE : 0) |
+            (events & FileReadyType::Closed ? EV_CLOSED : 0),
+            [](evutil_socket_t, short what, void* arg) -> void {
+                auto* event = static_cast<FileEventImpl*>(arg);
+                uint32_t events = 0;
+                if (what & EV_READ) {
+                    events |= FileReadyType::Read;
+                }
 
-        if (what & EV_WRITE) {
-          events |= FileReadyType::Write;
-        }
+                if (what & EV_WRITE) {
+                    events |= FileReadyType::Write;
+                }
 
-        if (what & EV_CLOSED) {
-          events |= FileReadyType::Closed;
-        }
+                if (what & EV_CLOSED) {
+                    events |= FileReadyType::Closed;
+                }
 
-        assert(events != 0);
-        event->mergeInjectedEventsAndRunCb(events);
-      },
-      this);
+                assert(events != 0);
+                event->mergeInjectedEventsAndRunCb(events);
+            },
+            this);
 }
 
 void FileEventImpl::updateEvents(uint32_t events) {

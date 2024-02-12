@@ -48,24 +48,27 @@ void Acceptor::listen()
 {
   //loop_->assertInLoopThread();
   listening_ = true;
-  acceptSocket_.listen();
+  if(!acceptSocket_.listen()) return;
 
-   auto accept_event =  dispatcher_->createFileEvent(acceptSocket_.fd(),
-                                                     [this](uint32_t events){
+  int fd = acceptSocket_.fd();
+  auto accept_event =  dispatcher_->createFileEvent(fd,
+                                                     [this](uint32_t){
        std::cout << "handle read..." << std::endl;
-       handleRead(events);
+       handleRead();
        },
        Envoy::Event::FileTriggerType::Level,
        Envoy::Event::FileReadyType::Read);
 
-    //accept_event->activate(Envoy::Event::FileReadyType::Read);
-    accept_event->setEnabled(Envoy::Event::FileReadyType::Read);
-
+    if(accept_event){
+        accept_event->setEnabled(Envoy::Event::FileReadyType::Read);
+    }else{
+        std::cout << "null file event" << std::endl;
+    }
 }
 
-void Acceptor::handleRead(uint32_t flags)
+void Acceptor::handleRead()
 {
-    assert(flags & (Envoy::Event::FileReadyType::Read));
+    //assert(flags & (Envoy::Event::FileReadyType::Read));
   //loop_->assertInLoopThread();
   InetAddress peerAddr;
   //FIXME loop until no more

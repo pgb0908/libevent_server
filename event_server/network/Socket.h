@@ -49,7 +49,7 @@ class Socket : noncopyable
   /// abort if address in use
   void bindAddress(const InetAddress& localaddr);
   /// abort if address in use
-  void listen();
+  bool listen();
 
   /// On success, returns a non-negative integer that is
   /// a descriptor for the accepted socket, which has been
