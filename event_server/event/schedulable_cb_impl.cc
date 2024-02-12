@@ -1,5 +1,8 @@
 #include "schedulable_cb_impl.h"
 
+#include <utility>
+#include <cassert>
+
 
 #include "event2/event.h"
 
@@ -8,12 +11,12 @@ namespace Event {
 
 SchedulableCallbackImpl::SchedulableCallbackImpl(Libevent::BasePtr& libevent,
                                                  std::function<void()> cb)
-    : cb_(cb) {
-  //ASSERT(cb_);
+    : cb_(std::move(cb)) {
+  assert(cb_);
   evtimer_assign(
       &raw_event_, libevent.get(),
       [](evutil_socket_t, short, void* arg) -> void {
-        SchedulableCallbackImpl* cb = static_cast<SchedulableCallbackImpl*>(arg);
+        auto* cb = static_cast<SchedulableCallbackImpl*>(arg);
         cb->cb_();
       },
       this);

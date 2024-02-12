@@ -1,27 +1,31 @@
 #include "file_event_impl.h"
 
 #include <cstdint>
+#include <utility>
 
 #include "dispatcher_impl.h"
 
 #include "event2/event.h"
+
+#define SOCKET_VALID(sock) ((sock) >= 0)
 
 namespace Envoy {
 namespace Event {
 
 FileEventImpl::FileEventImpl(DispatcherImpl& dispatcher, int fd, FileReadyCb cb,
                              FileTriggerType trigger, uint32_t events)
-    : dispatcher_(dispatcher), cb_(cb), fd_(fd), trigger_(trigger), enabled_events_(events),
+    : dispatcher_(dispatcher), cb_(std::move(cb)), fd_(fd), trigger_(trigger), enabled_events_(events),
       activation_cb_(dispatcher.createSchedulableCallback([this]() {
-        ////ASSERT(injected_activation_events_ != 0);
+        assert(injected_activation_events_ != 0);
         mergeInjectedEventsAndRunCb(0);
       })) {
   // Treat the lack of a valid fd (which in practice should only happen if we run out of FDs) as
   // an OOM condition and just crash.
-  //RELEASE_//ASSERT(SOCKET_VALID(fd), "");
+  assert(SOCKET_VALID(fd));
 
   if constexpr (PlatformDefaultTriggerType != FileTriggerType::EmulatedEdge) {
     //ASSERT(trigger_ != FileTriggerType::EmulatedEdge,"Cannot use EmulatedEdge events if they are not the default platform type");
+    assert(trigger_ != FileTriggerType::EmulatedEdge);
   }
 
   assignEvents(events, &dispatcher.base());
@@ -32,17 +36,17 @@ void FileEventImpl::activate(uint32_t events) {
   ////ASSERT(dispatcher_.isThreadSafe());
 
   // events is not empty.
-  ////ASSERT(events != 0);
+  assert(events != 0);
   // Only supported event types are set.
-  ////ASSERT((events & (FileReadyType::Read | FileReadyType::Write | FileReadyType::Closed)) == events);
+    assert((events & (FileReadyType::Read | FileReadyType::Write | FileReadyType::Closed)) == events);
 
   // Schedule the activation callback so it runs as part of the next loop iteration if it is not
   // already scheduled.
   if (injected_activation_events_ == 0) {
-    ////ASSERT(!activation_cb_->enabled());
+    assert(!activation_cb_->enabled());
     activation_cb_->scheduleCallbackNextIteration();
   }
-  ////ASSERT(activation_cb_->enabled());
+  assert(activation_cb_->enabled());
 
   // Merge new events with pending injected events.
   injected_activation_events_ |= events;
@@ -50,7 +54,7 @@ void FileEventImpl::activate(uint32_t events) {
 
 void FileEventImpl::assignEvents(uint32_t events, event_base* base) {
   ////ASSERT(dispatcher_.isThreadSafe());
-  ////ASSERT(base != nullptr);
+  assert(base != nullptr);
 
   enabled_events_ = events;
   event_assign(
@@ -74,7 +78,7 @@ void FileEventImpl::assignEvents(uint32_t events, event_base* base) {
           events |= FileReadyType::Closed;
         }
 
-        ////ASSERT(events != 0);
+        assert(events != 0);
         event->mergeInjectedEventsAndRunCb(events);
       },
       this);

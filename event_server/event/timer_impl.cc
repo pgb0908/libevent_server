@@ -1,6 +1,7 @@
 #include "timer_impl.h"
 
 #include <chrono>
+#include <utility>
 
 #include "event2/event.h"
 
@@ -8,8 +9,8 @@ namespace Envoy {
 namespace Event {
 
 TimerImpl::TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Dispatcher& dispatcher)
-    : cb_(cb), dispatcher_(dispatcher) {
-  ////ASSERT(cb_);
+    : cb_(std::move(cb)), dispatcher_(dispatcher) {
+  assert(cb_);
   evtimer_assign(
       &raw_event_, libevent.get(),
       [](evutil_socket_t, short, void* arg) -> void {

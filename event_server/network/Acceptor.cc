@@ -31,8 +31,8 @@ Acceptor::Acceptor(Envoy::Event::Dispatcher* dispatcher, const InetAddress& list
   acceptSocket_.setReuseAddr(true);
   acceptSocket_.setReusePort(reuseport);
   acceptSocket_.bindAddress(listenAddr);
-  acceptChannel_.setReadCallback(
-      std::bind(&Acceptor::handleRead, this));
+/*  acceptChannel_.setReadCallback(
+      std::bind(&Acceptor::handleRead, this));*/
 
     //listen();
 }
@@ -49,11 +49,23 @@ void Acceptor::listen()
   //loop_->assertInLoopThread();
   listening_ = true;
   acceptSocket_.listen();
-  acceptChannel_.enableReading();
+
+   auto accept_event =  dispatcher_->createFileEvent(acceptSocket_.fd(),
+                                                     [this](uint32_t events){
+       std::cout << "handle read..." << std::endl;
+       handleRead(events);
+       },
+       Envoy::Event::FileTriggerType::Level,
+       Envoy::Event::FileReadyType::Read);
+
+    //accept_event->activate(Envoy::Event::FileReadyType::Read);
+    accept_event->setEnabled(Envoy::Event::FileReadyType::Read);
+
 }
 
-void Acceptor::handleRead()
+void Acceptor::handleRead(uint32_t flags)
 {
+    assert(flags & (Envoy::Event::FileReadyType::Read));
   //loop_->assertInLoopThread();
   InetAddress peerAddr;
   //FIXME loop until no more

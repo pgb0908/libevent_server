@@ -46,7 +46,7 @@ class Acceptor : noncopyable
   // bool listenning() const { return listening(); }
 
  private:
-  void handleRead();
+  void handleRead(uint32_t events);
 
     Envoy::Event::Dispatcher* dispatcher_;
   Socket acceptSocket_;

@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <sys/uio.h>  // readv
 #include <unistd.h>
+#include <iostream>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -108,6 +109,7 @@ void sockets::listenOrDie(int sockfd)
   if (ret < 0)
   {
     // LOG_SYSFATAL << "sockets::listenOrDie";
+    std::cout << "sockets::listenOrDie" << std::endl;
   }
 }
 

@@ -210,6 +210,7 @@ TimerPtr DispatcherImpl::createScaledTimer(ScaledTimerMinimum minimum, TimerCb c
 
 Event::SchedulableCallbackPtr DispatcherImpl::createSchedulableCallback(std::function<void()> cb) {
   //ASSERT(isThreadSafe());
+  assert(cb);
   return base_scheduler_.createSchedulableCallback([this, cb]() {
     touchWatchdog();
     cb();
@@ -389,6 +390,7 @@ void DispatcherImpl::runPostCallbacks() {
 }*/
 
 void DispatcherImpl::touchWatchdog() {
+    std::cout << "touchWatchdog" << std::endl;
 /*  if (watchdog_registration_) {
     watchdog_registration_->touchWatchdog();
   }*/

@@ -52,7 +52,6 @@ void Channel::update()
 {
   addedToLoop_ = true;
   //loop_->updateChannel(this);
-
 }
 
 void Channel::remove()
