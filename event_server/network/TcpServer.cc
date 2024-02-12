@@ -59,12 +59,14 @@ void TcpServer::start()
   if (started_.getAndSet(1) == 0)
   {
     //threadPool_->start(threadInitCallback_);
+      //assert(!acceptor_->listening());
+      dispatcher_->post([](){std::cout << "server is boot..." << std::endl;});
 
-    assert(!acceptor_->listening());
-/*    loop_->runInLoop(
-        std::bind(&Acceptor::listen, acceptor_.get()));*/
+      infinit_loop();
 
-      dispatcher_->post([this] { std::bind(&Acceptor::listen, acceptor_.get()); });
+      dispatcher_->post([this] {
+          acceptor_->listen();
+      });
       dispatcher_->run(Envoy::Event::Dispatcher::RunType::Block);
   }
 
@@ -116,5 +118,17 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr& conn)
   assert(n == 1);
   //EventLoop* ioLoop = conn->getLoop();
   //ioLoop->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
+}
+
+void TcpServer::say_hello(){
+    std::cout << " ------------------hello" << std::endl;
+    infinit_loop();
+}
+
+void TcpServer::infinit_loop() {
+    loop_timer_ = dispatcher_->createTimer([this]()->void{say_hello();});
+
+    loop_timer_->enableTimer(std::chrono::milliseconds(1000));
+
 }
 

@@ -33,6 +33,8 @@ Acceptor::Acceptor(Envoy::Event::Dispatcher* dispatcher, const InetAddress& list
   acceptSocket_.bindAddress(listenAddr);
   acceptChannel_.setReadCallback(
       std::bind(&Acceptor::handleRead, this));
+
+    //listen();
 }
 
 Acceptor::~Acceptor()

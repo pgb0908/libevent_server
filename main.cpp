@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <thread>
 #include "event_server/event/dispatcher_impl.h"
 #include "event_server/thread/thread_impl.h"
 #include "event_server/event/real_time_system.h"
@@ -8,8 +9,6 @@
 #include "event_server/network/TcpServer.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-
     std::unique_ptr<Envoy::Thread::ThreadFactoryImplPosix> threadFactoryImplPosix =
             std::make_unique<Envoy::Thread::ThreadFactoryImplPosix>();
 
@@ -21,10 +20,11 @@ int main() {
         return std::make_unique<Envoy::Event::ScaledRangeTimerManagerImpl>(dispatcher);
     });
 
-    muduo::net::InetAddress listenAddr(2007);
+    muduo::net::InetAddress listenAddr(9990);
     muduo::net::TcpServer tcpServer = muduo::net::TcpServer(&dispatcherImpl, listenAddr, "tcp-server");
 
     tcpServer.start();
+
 
     return 0;
 }

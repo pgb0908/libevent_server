@@ -110,6 +110,10 @@ class TcpServer : noncopyable
   // always in loop thread
   int nextConnId_;
   ConnectionMap connections_;
+    Envoy::Event::TimerPtr loop_timer_;
+
+    void infinit_loop();
+    void say_hello();
 };
 
 }  // namespace net
