@@ -59,15 +59,15 @@ void TcpServer::start()
   if (started_.getAndSet(1) == 0)
   {
     //threadPool_->start(threadInitCallback_);
-      //assert(!acceptor_->listening());
+      assert(!acceptor_->listening());
       dispatcher_->post([](){std::cout << "server is boot..." << std::endl;});
 
-      infinit_loop();
+      //infinit_loop();
 
       dispatcher_->post([this] {
           acceptor_->listen();
       });
-      dispatcher_->run(Envoy::Event::Dispatcher::RunType::Block);
+      dispatcher_->run(Envoy::Event::Dispatcher::RunType::RunUntilExit);
   }
 
 
@@ -128,7 +128,7 @@ void TcpServer::say_hello(){
 void TcpServer::infinit_loop() {
     loop_timer_ = dispatcher_->createTimer([this]()->void{say_hello();});
 
-    loop_timer_->enableTimer(std::chrono::milliseconds(1000));
+    loop_timer_->enableTimer(std::chrono::milliseconds(5000));
 
 }
 
