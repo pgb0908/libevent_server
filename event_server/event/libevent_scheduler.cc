@@ -55,7 +55,7 @@ void LibeventScheduler::registerOnPrepareCallback(OnPrepareCallback&& callback) 
   //ASSERT(!callback_);
 
   callback_ = std::move(callback);
-  evwatch_prepare_new(libevent_.get(), &onPrepareForCallback, this);
+  //evwatch_prepare_new(libevent_.get(), &onPrepareForCallback, this);
 }
 
 /*void LibeventScheduler::initializeStats(DispatcherStats* stats) {
@@ -65,13 +65,13 @@ void LibeventScheduler::registerOnPrepareCallback(OnPrepareCallback&& callback) 
   evwatch_check_new(libevent_.get(), &onCheckForStats, this);
 }*/
 
-void LibeventScheduler::onPrepareForCallback(evwatch*, const evwatch_prepare_cb_info*, void* arg) {
+/*void LibeventScheduler::onPrepareForCallback(evwatch*, const evwatch_prepare_cb_info*, void* arg) {
   // `self` is `this`, passed in from evwatch_prepare_new.
   auto self = static_cast<LibeventScheduler*>(arg);
   self->callback_();
-}
+}*/
 
-void LibeventScheduler::onPrepareForStats(evwatch*, const evwatch_prepare_cb_info* info,
+/*void LibeventScheduler::onPrepareForStats(evwatch*, const evwatch_prepare_cb_info* info,
                                           void* arg) {
   // `self` is `this`, passed in from evwatch_prepare_new.
   auto self = static_cast<LibeventScheduler*>(arg);
@@ -90,9 +90,9 @@ void LibeventScheduler::onPrepareForStats(evwatch*, const evwatch_prepare_cb_inf
     evutil_timersub(&self->prepare_time_, &self->check_time_, &delta);
     //recordTimeval(self->stats_->loop_duration_us_, delta);
   }
-}
+}*/
 
-void LibeventScheduler::onCheckForStats(evwatch*, const evwatch_check_cb_info*, void* arg) {
+/*void LibeventScheduler::onCheckForStats(evwatch*, const evwatch_check_cb_info*, void* arg) {
   // `self` is `this`, passed in from evwatch_check_new.
   auto self = static_cast<LibeventScheduler*>(arg);
 
@@ -113,7 +113,7 @@ void LibeventScheduler::onCheckForStats(evwatch*, const evwatch_check_cb_info*, 
       //recordTimeval(self->stats_->poll_delay_us_, delay);
     }
   }
-}
+}*/
 
 } // namespace Event
 } // namespace Envoy

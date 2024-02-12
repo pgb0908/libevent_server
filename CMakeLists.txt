@@ -22,9 +22,23 @@ set(event_server_lib
         event_server/event/signal_impl.cc
         event_server/thread/thread.cc
         event_server/thread/thread_impl.cc
+
+        event_server/network/Acceptor.cc
+        event_server/network/Buffer.cc
+        event_server/network/Channel.cc
+        event_server/network/Connector.cc
+        event_server/network/InetAddress.cc
+        event_server/network/Socket.cc
+        event_server/network/SocketsOps.cc
+        event_server/network/TcpConnection.cc
+        event_server/network/TcpServer.cc
+        event_server/network/Timestamp.cc
+
 )
 
 add_executable(libevent_server main.cpp ${event_server_lib})
 
 
-target_link_libraries(libevent_server)
+target_link_libraries(libevent_server
+        libevent::libevent
+        abseil::abseil)

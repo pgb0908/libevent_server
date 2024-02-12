@@ -2,6 +2,7 @@
 #include "thread_impl.h"
 
 #include "absl/strings/str_cat.h"
+#include <unistd.h>
 
 #if defined(__linux__)
 #include <sys/syscall.h>
