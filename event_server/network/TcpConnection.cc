@@ -21,9 +21,9 @@ using namespace muduo::net;
 
 void muduo::net::defaultConnectionCallback(const TcpConnectionPtr& conn)
 {
-/*  LOG_TRACE << conn->localAddress().toIpPort() << " -> "
+  std::cout << conn->localAddress().toIpPort() << " -> "
             << conn->peerAddress().toIpPort() << " is "
-            << (conn->connected() ? "UP" : "DOWN");*/
+            << (conn->connected() ? "UP" : "DOWN") << std::endl;
   // do not call conn->forceClose(), because some users want to register message callback only.
 }
 
@@ -49,16 +49,29 @@ TcpConnection::TcpConnection(Envoy::Event::Dispatcher* dispatcher,
     peerAddr_(peerAddr),
     highWaterMark_(64*1024*1024)
 {
-  channel_->setReadCallback(
+/*  channel_->setReadCallback(
       std::bind(&TcpConnection::handleRead, this, _1));
   channel_->setWriteCallback(
       std::bind(&TcpConnection::handleWrite, this));
   channel_->setCloseCallback(
       std::bind(&TcpConnection::handleClose, this));
   channel_->setErrorCallback(
-      std::bind(&TcpConnection::handleError, this));
-/*  LOG_DEBUG << "TcpConnection::ctor[" <<  name_ << "] at " << this
-            << " fd=" << sockfd;*/
+      std::bind(&TcpConnection::handleError, this));*/
+
+
+
+/*    auto writeCallback = dispatcher_->createFileEvent(socket_->fd(),
+                                                     [this](uint32_t) {
+                                                         handleWrite();
+                                                     },
+                                                     Envoy::Event::FileTriggerType::Level,
+                                                     Envoy::Event::FileReadyType::Write);
+
+    writeCallback->setEnabled(Envoy::Event::FileReadyType::Write);*/
+
+
+  std::cout << "TcpConnection::ctor[" <<  name_ << "] at " << this
+            << " fd=" << sockfd;
   socket_->setKeepAlive(true);
 }
 
@@ -105,6 +118,7 @@ void TcpConnection::send(const StringPiece& message)
                     message.as_string()));
                     //std::forward<string>(message)));
     }*/
+
 
 
   }
@@ -323,13 +337,26 @@ void TcpConnection::stopReadInLoop()
 
 void TcpConnection::connectEstablished()
 {
+    std::cout << "TcpConnection::connectEstablished()" << std::endl;
  // loop_->assertInLoopThread();
   assert(state_ == kConnecting);
   setState(kConnected);
-  channel_->tie(shared_from_this());
-  channel_->enableReading();
+  //channel_->tie(shared_from_this());
+  //channel_->enableReading();
 
   connectionCallback_(shared_from_this());
+
+
+    std::cout << "TcpConnection: socke[" << socket_->fd() << "]" << std::endl;
+    auto readCallback = dispatcher_->createFileEvent(socket_->fd(),
+                                                    [this](uint32_t) {
+                                                        std::cout << "read-callback" << std::endl;
+                                                        //handleRead();
+                                                    },
+                                                    Envoy::Event::FileTriggerType::Level,
+                                                    Envoy::Event::FileReadyType::Read);
+
+    readCallback->setEnabled(Envoy::Event::FileReadyType::Read);
 }
 
 void TcpConnection::connectDestroyed()
@@ -345,14 +372,21 @@ void TcpConnection::connectDestroyed()
   channel_->remove();
 }
 
-void TcpConnection::handleRead(Timestamp receiveTime)
+void TcpConnection::handleRead()
 {
+
   //loop_->assertInLoopThread();
   int savedErrno = 0;
-  ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
+  ssize_t n = inputBuffer_.readFd(socket_->fd(), &savedErrno);
   if (n > 0)
   {
-    messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
+      ssize_t data = sockets::write(channel_->fd(),
+                                 outputBuffer_.peek(),
+                                 outputBuffer_.readableBytes());
+
+      outputBuffer_.retrieve(data);
+
+    //messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
   }
   else if (n == 0)
   {

@@ -26,37 +26,39 @@ class InetAddress;
 ///
 /// Acceptor of incoming TCP connections.
 ///
-class Acceptor : noncopyable
-{
- public:
-  typedef std::function<void (int sockfd, const InetAddress&)> NewConnectionCallback;
+    class Acceptor : noncopyable {
+    public:
+        typedef std::function<void(int sockfd, const InetAddress &)> NewConnectionCallback;
 
-  Acceptor(Envoy::Event::Dispatcher* dispatcher, const InetAddress& listenAddr, bool reuseport);
-  ~Acceptor();
+        Acceptor(Envoy::Event::Dispatcher *dispatcher, const InetAddress &listenAddr, bool reuseport);
 
-  void setNewConnectionCallback(const NewConnectionCallback& cb)
-  { newConnectionCallback_ = cb; }
+        ~Acceptor();
 
-  void listen();
+        void setNewConnectionCallback(const NewConnectionCallback &cb) { newConnectionCallback_ = cb; }
 
-  bool listening() const { return listening_; }
+        void listen();
 
-  // Deprecated, use the correct spelling one above.
-  // Leave the wrong spelling here in case one needs to grep it for error messages.
-  // bool listenning() const { return listening(); }
+        bool listening() const { return listening_; }
 
-    void handleRead();
+        // Deprecated, use the correct spelling one above.
+        // Leave the wrong spelling here in case one needs to grep it for error messages.
+        // bool listenning() const { return listening(); }
 
- private:
+        int handleRead();
+
+        const Socket &getAcceptSocket() const;
+
+    private:
 
 
-    Envoy::Event::Dispatcher* dispatcher_;
-  Socket acceptSocket_;
-  Channel acceptChannel_;
-  NewConnectionCallback newConnectionCallback_;
-  bool listening_;
-  int idleFd_;
-};
+        Envoy::Event::Dispatcher *dispatcher_;
+        Socket acceptSocket_;
+        NewConnectionCallback newConnectionCallback_;
+        bool listening_;
+        int idleFd_;
+
+        void registAccept();
+    };
 
 }  // namespace net
 }  // namespace muduo

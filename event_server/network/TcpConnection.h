@@ -116,7 +116,7 @@ class TcpConnection : noncopyable,
 
  private:
   enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
-  void handleRead(Timestamp receiveTime);
+  void handleRead();
   void handleWrite();
   void handleClose();
   void handleError();

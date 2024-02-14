@@ -40,5 +40,7 @@ add_executable(libevent_server main.cpp ${event_server_lib})
 
 
 target_link_libraries(libevent_server
-        libevent::libevent
+        libevent::core
+        libevent::extra
+        libevent::pthreads
         abseil::abseil)

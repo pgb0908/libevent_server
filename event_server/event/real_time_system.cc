@@ -1,6 +1,7 @@
 #include "real_time_system.h"
 
 #include <chrono>
+#include <memory>
 
 #include "timer_impl.h"
 
@@ -22,7 +23,7 @@ private:
 } // namespace
 
 SchedulerPtr RealTimeSystem::createScheduler(Scheduler& base_scheduler, CallbackScheduler&) {
-  return std::unique_ptr<RealScheduler>(new RealScheduler(base_scheduler));
+  return std::make_unique<RealScheduler>(base_scheduler);
 }
 
 } // namespace Event

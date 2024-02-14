@@ -23,7 +23,6 @@ using namespace muduo::net;
 Acceptor::Acceptor(Envoy::Event::Dispatcher* dispatcher, const InetAddress& listenAddr, bool reuseport)
   : dispatcher_(dispatcher),
     acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
-    acceptChannel_(dispatcher, acceptSocket_.fd()),
     listening_(false),
     idleFd_(::open("/dev/null", O_RDONLY | O_CLOEXEC))
 {
@@ -31,43 +30,44 @@ Acceptor::Acceptor(Envoy::Event::Dispatcher* dispatcher, const InetAddress& list
   acceptSocket_.setReuseAddr(true);
   acceptSocket_.setReusePort(reuseport);
   acceptSocket_.bindAddress(listenAddr);
-/*  acceptChannel_.setReadCallback(
-      std::bind(&Acceptor::handleRead, this));*/
-
-    //listen();
 }
 
 Acceptor::~Acceptor()
 {
-  acceptChannel_.disableAll();
-  acceptChannel_.remove();
   ::close(idleFd_);
 }
 
 void Acceptor::listen()
 {
-  //loop_->assertInLoopThread();
-  listening_ = true;
-  if(!acceptSocket_.listen()) return;
+    //loop_->assertInLoopThread();
+    listening_ = true;
+    if (!acceptSocket_.listen()) return;
 
-  int fd = acceptSocket_.fd();
-  auto accept_event =  dispatcher_->createFileEvent(fd,
-                                                     [this](uint32_t){
-       std::cout << "handle read..." << std::endl;
-       handleRead();
-       },
-       Envoy::Event::FileTriggerType::Level,
-       Envoy::Event::FileReadyType::Read);
+    // todo 왜 여기에서 createFileEvent() 동작을 안할까??
+/*    auto accept_event = dispatcher_->createFileEvent(acceptSocket_.fd(),
+                                                     [this](uint32_t) {
+                                                         std::cout << "handle read..." << std::endl;
+                                                         //handleRead();
+                                                     },
+                                                     Envoy::Event::FileTriggerType::Level,
+                                                     Envoy::Event::FileReadyType::Read);
 
-    if(accept_event){
+    if (accept_event) {
         accept_event->setEnabled(Envoy::Event::FileReadyType::Read);
-    }else{
+    } else {
         std::cout << "null file event" << std::endl;
-    }
+    }*/
+
+/*    int fd = acceptSocket_.fd();
+
+    registAccept();*/
+
 }
 
-void Acceptor::handleRead()
+int Acceptor::handleRead()
 {
+
+    std::cout << "accept::handleRead()" << std::endl;
     //assert(flags & (Envoy::Event::FileReadyType::Read));
   //loop_->assertInLoopThread();
   InetAddress peerAddr;
@@ -100,5 +100,27 @@ void Acceptor::handleRead()
       idleFd_ = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
     }
   }
+
+    return connfd;
+}
+
+const Socket &Acceptor::getAcceptSocket() const {
+    return acceptSocket_;
+}
+
+void Acceptor::registAccept() {
+    auto accept_event = dispatcher_->createFileEvent(acceptSocket_.fd(),
+                                                     [this](uint32_t) {
+                                                         std::cout << "handle read..." << std::endl;
+                                                         //handleRead();
+                                                     },
+                                                     Envoy::Event::FileTriggerType::Level,
+                                                     Envoy::Event::FileReadyType::Read);
+
+    if (accept_event) {
+        accept_event->setEnabled(Envoy::Event::FileReadyType::Read);
+    } else {
+        std::cout << "null file event" << std::endl;
+    }
 }
 

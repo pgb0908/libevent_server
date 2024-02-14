@@ -9,7 +9,7 @@
 #include "libevent.h"
 
 #include "event2/event.h"
-//#include "event2/watch.h"
+#include "event2/watch.h"
 
 namespace Envoy {
 namespace Event {
@@ -100,9 +100,9 @@ public:
   //void initializeStats(DispatcherStats* stats);
 
 private:
-/*  static void onPrepareForCallback(evwatch*, const evwatch_prepare_cb_info* info, void* arg);
+  static void onPrepareForCallback(evwatch*, const evwatch_prepare_cb_info* info, void* arg);
   static void onPrepareForStats(evwatch*, const evwatch_prepare_cb_info* info, void* arg);
-  static void onCheckForStats(evwatch*, const evwatch_check_cb_info*, void* arg);*/
+  static void onCheckForStats(evwatch*, const evwatch_check_cb_info*, void* arg);
 
   static constexpr int flagsBasedOnEventType() {
     if constexpr (Event::PlatformDefaultTriggerType == FileTriggerType::Level) {
