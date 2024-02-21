@@ -14,7 +14,7 @@
 #include "Atomic.h"
 #include "Types.h"
 #include "TcpConnection.h"
-#include "../event/dispatcher.h"
+#include "event_server/event/Dispatcher.h"
 
 #include <map>
 
@@ -32,7 +32,7 @@ class Acceptor;
 class TcpServer : noncopyable
 {
  public:
-  typedef std::function<void(Envoy::Event::Dispatcher*)> ThreadInitCallback;
+
   enum Option
   {
     kNoReusePort,
@@ -40,7 +40,7 @@ class TcpServer : noncopyable
   };
 
   //TcpServer(EventLoop* loop, const InetAddress& listenAddr);
-  TcpServer(Envoy::Event::Dispatcher* dispatcher,
+  TcpServer(Dispatcher* dispatcher,
             const InetAddress& listenAddr,
             const string& nameArg,
             Option option = kNoReusePort);
@@ -48,7 +48,7 @@ class TcpServer : noncopyable
 
   const string& ipPort() const { return ipPort_; }
   const string& name() const { return name_; }
-  Envoy::Event::Dispatcher* getLoop() const { return dispatcher_; }
+  Dispatcher* dispatcher() const { return dispatcher_; }
 
   /// Set the number of threads for handling input.
   ///
@@ -61,8 +61,7 @@ class TcpServer : noncopyable
   /// - N means a thread pool with N threads, new connections
   ///   are assigned on a round-robin basis.
   void setThreadNum(int numThreads);
-  void setThreadInitCallback(const ThreadInitCallback& cb)
-  { threadInitCallback_ = cb; }
+
   /// valid after calling start()
   //std::shared_ptr<EventLoopThreadPool> threadPool(){ return threadPool_; }
 
@@ -72,32 +71,17 @@ class TcpServer : noncopyable
   /// Thread safe.
   void start();
 
-  /// Set connection callback.
-  /// Not thread safe.
-  void setConnectionCallback(const ConnectionCallback& cb)
-  { connectionCallback_ = cb; }
-
-  /// Set message callback.
-  /// Not thread safe.
-  void setMessageCallback(const MessageCallback& cb)
-  { messageCallback_ = cb; }
-
-  /// Set write complete callback.
-  /// Not thread safe.
-  void setWriteCompleteCallback(const WriteCompleteCallback& cb)
-  { writeCompleteCallback_ = cb; }
-
  private:
   /// Not thread safe, but in loop
   void newConnection(int sockfd, const InetAddress& peerAddr);
   /// Thread safe.
   void removeConnection(const TcpConnectionPtr& conn);
   /// Not thread safe, but in loop
-  void removeConnectionInLoop(const TcpConnectionPtr& conn);
+ // void removeConnectionInLoop(const TcpConnectionPtr& conn);
 
   typedef std::map<string, TcpConnectionPtr> ConnectionMap;
 
-  Envoy::Event::Dispatcher* dispatcher_;  // the acceptor loop
+  Dispatcher* dispatcher_;  // the acceptor loop
   const string ipPort_;
   const string name_;
   std::unique_ptr<Acceptor> acceptor_; // avoid revealing Acceptor
@@ -105,15 +89,12 @@ class TcpServer : noncopyable
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
   WriteCompleteCallback writeCompleteCallback_;
-  ThreadInitCallback threadInitCallback_;
+
   AtomicInt32 started_;
   // always in loop thread
   int nextConnId_;
   ConnectionMap connections_;
-    Envoy::Event::TimerPtr loop_timer_;
 
-    void infinit_loop();
-    void say_hello();
 };
 
 }  // namespace net

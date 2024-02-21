@@ -19,7 +19,7 @@ using namespace muduo::net;
 
 const int Connector::kMaxRetryDelayMs;
 
-Connector::Connector(Envoy::Event::Dispatcher* dispatcher, const InetAddress& serverAddr)
+Connector::Connector(Dispatcher* dispatcher, const InetAddress& serverAddr)
   : dispatcher_(dispatcher),
     serverAddr_(serverAddr),
     connect_(false),

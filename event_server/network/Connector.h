@@ -13,63 +13,63 @@
 
 #include "noncopyable.h"
 #include "InetAddress.h"
-#include "event_server/event/dispatcher.h"
+#include "event_server/event/Dispatcher.h"
 
 #include <functional>
 #include <memory>
 
-namespace muduo
-{
-namespace net
-{
+namespace muduo {
+    namespace net {
 
-class Channel;
-class EventLoop;
+        class Channel;
 
-class Connector : noncopyable,
-                  public std::enable_shared_from_this<Connector>
-{
- public:
-  typedef std::function<void (int sockfd)> NewConnectionCallback;
+        class EventLoop;
 
-  Connector(Envoy::Event::Dispatcher* dispatcher, const InetAddress& serverAddr);
-  ~Connector();
+        class Connector : noncopyable,
+                          public std::enable_shared_from_this<Connector> {
+        public:
+            typedef std::function<void(int sockfd)> NewConnectionCallback;
 
-  void setNewConnectionCallback(const NewConnectionCallback& cb)
-  { newConnectionCallback_ = cb; }
+            Connector(Dispatcher *dispatcher, const InetAddress &serverAddr);
 
-  void start();  // can be called in any thread
-  void restart();  // must be called in loop thread
-  void stop();  // can be called in any thread
+            ~Connector();
 
-  const InetAddress& serverAddress() const { return serverAddr_; }
+            void setNewConnectionCallback(const NewConnectionCallback &cb) { newConnectionCallback_ = cb; }
 
- private:
-  enum States { kDisconnected, kConnecting, kConnected };
-  static const int kMaxRetryDelayMs = 30*1000;
-  static const int kInitRetryDelayMs = 500;
+            void start();  // can be called in any thread
+            void restart();  // must be called in loop thread
+            void stop();  // can be called in any thread
 
-  void setState(States s) { state_ = s; }
-  void startInLoop();
-  void stopInLoop();
-  void connect();
-  void connecting(int sockfd);
-  void handleWrite();
-  void handleError();
-  void retry(int sockfd);
-  int removeAndResetChannel();
-  void resetChannel();
+            const InetAddress &serverAddress() const { return serverAddr_; }
 
-    Envoy::Event::Dispatcher* dispatcher_;
-  InetAddress serverAddr_;
-  bool connect_; // atomic
-  States state_;  // FIXME: use atomic variable
-  std::unique_ptr<Channel> channel_;
-  NewConnectionCallback newConnectionCallback_;
-  int retryDelayMs_;
-};
+        private:
+            enum States {
+                kDisconnected, kConnecting, kConnected
+            };
+            static const int kMaxRetryDelayMs = 30 * 1000;
+            static const int kInitRetryDelayMs = 500;
 
-}  // namespace net
+            void setState(States s) { state_ = s; }
+            void startInLoop();
+            void stopInLoop();
+            void connect();
+            void connecting(int sockfd);
+            void handleWrite();
+            void handleError();
+            void retry(int sockfd);
+            int removeAndResetChannel();
+            void resetChannel();
+
+            Dispatcher *dispatcher_;
+            InetAddress serverAddr_;
+            bool connect_; // atomic
+            States state_;  // FIXME: use atomic variable
+            std::unique_ptr<Channel> channel_;
+            NewConnectionCallback newConnectionCallback_;
+            int retryDelayMs_;
+        };
+
+    }  // namespace net
 }  // namespace muduo
 
 #endif  // MUDUO_NET_CONNECTOR_H

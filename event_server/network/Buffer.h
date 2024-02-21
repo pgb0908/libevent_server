@@ -11,7 +11,7 @@
 #ifndef MUDUO_NET_BUFFER_H
 #define MUDUO_NET_BUFFER_H
 
-#include "copyable.h"
+#include "event_server/common/copyable.h"
 #include "StringPiece.h"
 #include "Types.h"
 
@@ -54,6 +54,10 @@ class Buffer : public muduo::copyable
     assert(writableBytes() == initialSize);
     assert(prependableBytes() == kCheapPrepend);
   }
+
+  ~Buffer(){
+      buffer_.empty();
+  };
 
   // implicit copy-ctor, move-ctor, dtor and assignment are fine
   // NOTE: implicit move-ctor is added in g++ 4.6

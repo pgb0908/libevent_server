@@ -1,25 +1,13 @@
 #include <iostream>
 #include <memory>
 #include <thread>
-#include "event_server/event/dispatcher_impl.h"
-#include "event_server/thread/thread_impl.h"
-#include "event_server/event/real_time_system.h"
-#include "event_server/event/dispatcher.h"
-#include "event_server/event/scaled_range_timer_manager_impl.h"
 #include "event_server/network/TcpServer.h"
 
 int main() {
-    std::unique_ptr<Envoy::Thread::ThreadFactoryImplPosix> threadFactoryImplPosix =
-            std::make_unique<Envoy::Thread::ThreadFactoryImplPosix>();
 
-    Envoy::RealTimeSource this_time = Envoy::RealTimeSource();
-    Envoy::Event::RealTimeSystem realTimeSystem = Envoy::Event::RealTimeSystem();
 
-    auto dispatcherImpl = Envoy::Event::DispatcherImpl("tcp_server", *threadFactoryImplPosix,
-                                               this_time, realTimeSystem, [](Envoy::Event::Dispatcher& dispatcher) {
-        return std::make_unique<Envoy::Event::ScaledRangeTimerManagerImpl>(dispatcher);
-    });
 
+    auto dispatcherImpl = Dispatcher();
 
     muduo::net::InetAddress listenAddr("127.0.0.1",9990);
     muduo::net::TcpServer tcpServer = muduo::net::TcpServer(&dispatcherImpl, listenAddr, "tcp-server");
