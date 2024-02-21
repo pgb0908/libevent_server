@@ -29,8 +29,7 @@ void muduo::net::defaultConnectionCallback(const TcpConnectionPtr &conn) {
 }
 
 void muduo::net::defaultMessageCallback(const TcpConnectionPtr &,
-                                        Buffer *buf,
-                                        Timestamp) {
+                                        Buffer *buf) {
     buf->retrieveAll();
 }
 
@@ -286,52 +285,22 @@ void TcpConnection::stopReadInLoop() {
 
 FileEventPtr TcpConnection::connectEstablished() {
     // loop_->assertInLoopThread();
-/*  assert(state_ == kConnecting);
-  setState(kConnected);
-  channel_->tie(shared_from_this());
-  channel_->enableReading();
-
-  connectionCallback_(shared_from_this());*/
-
+    //connectionCallback_(shared_from_this())
     assert(state_ == kConnecting);
     setState(kConnected);
     auto event = dispatcher_->createFileEvent(socket_->fd(),
                                               [this](uint32_t events) {
-
                                                   int savedErrno = 0;
                                                   ssize_t n = inputBuffer_.readFd(socket_->fd(), &savedErrno);
                                                   if (n > 0) {
-                                                      //messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
-                                                      std::cout << "Client " << name_ << " " << "wrote: "
-                                                                << inputBuffer_.retrieveAllAsString() << std::endl;
-
-                                                      // write back to client.
-                                                      char wbuff[80];
-                                                      bzero(wbuff, sizeof(wbuff));
-                                                      time_t ticks = time(NULL);
-                                                      snprintf(wbuff, sizeof(wbuff),
-                                                               "Hello from server - %.24s\r\n", ctime(&ticks));
-
-                                                      //send(inputBuffer_);
-                                                      write(socket_->fd(), wbuff, sizeof(wbuff));
-                                                      event_base_dump_events(&dispatcher_->base(), stdout);
+                                                      handleRead();
                                                   } else if (n == 0) {
-                                                      //handleClose();
-                                                      std::cout << "Client [" << name_ << "] disconnected" << std::endl;
-
-                                                      /// guardThis 사용하지 않으면 double free 발생
-                                                      TcpConnectionPtr guardThis(shared_from_this());
-                                                      closeCallback_(guardThis);
-
-                                                      setState(kDisconnected);
-                                                      event_base_dump_events(&dispatcher_->base(), stdout);
+                                                      handleClose();
                                                   } else {
                                                       errno = savedErrno;
-                                                      //LOG_SYSERR << "TcpConnection::handleRead";
-                                                      //handleError();
+                                                      std::cout << "TcpConnection::handleRead" << std::endl;
+                                                      handleError();
                                                   }
-
-
                                               },
                                               FileTriggerType::Level,
                                               FileReadyType::Read);
@@ -349,19 +318,20 @@ void TcpConnection::connectDestroyed() {
     //channel_->remove();
 }
 
-void TcpConnection::handleRead(Timestamp receiveTime) {
+void TcpConnection::handleRead() {
     //loop_->assertInLoopThread();
-/*    int savedErrno = 0;
-    ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
-    if (n > 0) {
-        //messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
-    } else if (n == 0) {
-        handleClose();
-    } else {
-        errno = savedErrno;
-        //LOG_SYSERR << "TcpConnection::handleRead";
-        handleError();
-    }*/
+    messageCallback_(shared_from_this(), &inputBuffer_);
+
+    // write back to client.
+    char wbuff[80];
+    bzero(wbuff, sizeof(wbuff));
+    time_t ticks = time(NULL);
+    snprintf(wbuff, sizeof(wbuff),
+             "Hello from server - %.24s\r\n", ctime(&ticks));
+
+    //send(inputBuffer_);
+    write(socket_->fd(), wbuff, sizeof(wbuff));
+    event_base_dump_events(&dispatcher_->base(), stdout);
 }
 
 void TcpConnection::handleWrite() {
@@ -395,21 +365,21 @@ void TcpConnection::handleWrite() {
 
 void TcpConnection::handleClose() {
     // loop_->assertInLoopThread();
-    //LOG_TRACE << "fd = " << channel_->fd() << " state = " << stateToString();
+    std::cout << "fd = " << socket_->fd() << " state = " << stateToString() << std::endl;
     assert(state_ == kConnected || state_ == kDisconnecting);
     // we don't close fd, leave it to dtor, so we can find leaks easily.
     setState(kDisconnected);
-    //channel_->disableAll();
 
-/*  TcpConnectionPtr guardThis(shared_from_this());
-  connectionCallback_(guardThis);
-  // must be the last line
-  closeCallback_(guardThis);*/
+    /// guardThis 사용하지 않으면 double free 발생
+    TcpConnectionPtr guardThis(shared_from_this());
+    closeCallback_(guardThis);
+
+    event_base_dump_events(&dispatcher_->base(), stdout);
 }
 
 void TcpConnection::handleError() {
-    //int err = sockets::getSocketError(channel_->fd());
-    //LOG_ERROR << "TcpConnection::handleError [" << name_ << "] - SO_ERROR = " << err << " " << strerror_tl(err);
+    int err = sockets::getSocketError(socket_->fd());
+    std::cout << "TcpConnection::handleError [" << name_ << "] - SO_ERROR = " << err << " " << std::endl; //strerror_tl(err);
 }
 
 const FileEventPtr &TcpConnection::getReadEventPtr() const {

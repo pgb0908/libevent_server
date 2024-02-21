@@ -68,13 +68,11 @@ typedef std::function<void (const TcpConnectionPtr&, size_t)> HighWaterMarkCallb
 
 // the data has been read to (buf, len)
 typedef std::function<void (const TcpConnectionPtr&,
-                            Buffer*,
-                            Timestamp)> MessageCallback;
+                            Buffer* )> MessageCallback;
 
 void defaultConnectionCallback(const TcpConnectionPtr& conn);
 void defaultMessageCallback(const TcpConnectionPtr& conn,
-                            Buffer* buffer,
-                            Timestamp receiveTime);
+                            Buffer* buffer);
 
 }  // namespace net
 }  // namespace muduo

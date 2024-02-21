@@ -86,6 +86,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
 /*    conn->setConnectionCallback(connectionCallback_);
     conn->setMessageCallback(messageCallback_);
     conn->setWriteCompleteCallback(writeCompleteCallback_);*/
+    conn->setMessageCallback(messageCallback_);
     conn->setCloseCallback(
             std::bind(&TcpServer::removeConnection, this, _1)); // FIXME: unsafe
 

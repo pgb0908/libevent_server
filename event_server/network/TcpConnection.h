@@ -79,9 +79,9 @@ namespace muduo {
             const boost::any &getContext() const { return context_; }
             boost::any *getMutableContext() { return &context_; }
 
-/*            void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
+            //void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
             void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
-            void setWriteCompleteCallback(const WriteCompleteCallback &cb) { writeCompleteCallback_ = cb; }*/
+            //void setWriteCompleteCallback(const WriteCompleteCallback &cb) { writeCompleteCallback_ = cb; }
 /*            void setHighWaterMarkCallback(const HighWaterMarkCallback &cb, size_t highWaterMark) {
                 highWaterMarkCallback_ = cb;
                 highWaterMark_ = highWaterMark;
@@ -107,7 +107,7 @@ namespace muduo {
                 kDisconnected, kConnecting, kConnected, kDisconnecting
             };
 
-            void handleRead(Timestamp receiveTime);
+            void handleRead();
             void handleWrite();
             void handleClose();
             void handleError();
@@ -134,7 +134,7 @@ namespace muduo {
             const InetAddress localAddr_;
             const InetAddress peerAddr_;
             //ConnectionCallback connectionCallback_;
-            //MessageCallback messageCallback_;
+            MessageCallback messageCallback_;
             //WriteCompleteCallback writeCompleteCallback_;
             //HighWaterMarkCallback highWaterMarkCallback_;
             CloseCallback closeCallback_;
