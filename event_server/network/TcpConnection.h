@@ -81,6 +81,7 @@ namespace muduo {
 
             //void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
             void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
+            void setWriteCompleteCallback(const WriteCompleteCallback &cb) { writeCompleteCallback_ = cb; }
             //void setWriteCompleteCallback(const WriteCompleteCallback &cb) { writeCompleteCallback_ = cb; }
 /*            void setHighWaterMarkCallback(const HighWaterMarkCallback &cb, size_t highWaterMark) {
                 highWaterMarkCallback_ = cb;
@@ -88,8 +89,8 @@ namespace muduo {
             }*/
 
             /// Advanced interface
-            //Buffer *inputBuffer() { return &inputBuffer_; }
-            //Buffer *outputBuffer() { return &outputBuffer_; }
+            Buffer *inputBuffer() { return &inputBuffer_; }
+            Buffer *outputBuffer() { return &outputBuffer_; }
 
             /// Internal use only.
             void setCloseCallback(const CloseCallback &cb) { closeCallback_ = cb; }
@@ -135,14 +136,15 @@ namespace muduo {
             const InetAddress peerAddr_;
             //ConnectionCallback connectionCallback_;
             MessageCallback messageCallback_;
-            //WriteCompleteCallback writeCompleteCallback_;
+            WriteCompleteCallback writeCompleteCallback_;
             //HighWaterMarkCallback highWaterMarkCallback_;
             CloseCallback closeCallback_;
             size_t highWaterMark_;
             Buffer inputBuffer_;
-            //Buffer outputBuffer_; // FIXME: use list<Buffer> as output buffer.
+            Buffer outputBuffer_; // FIXME: use list<Buffer> as output buffer.
             boost::any context_;
             FileEventPtr readEventPtr_;
+            FileEventPtr writeEventPtr_;
             // FIXME: creationTime_, lastReceiveTime_
             //        bytesReceived_, bytesSent_
         };

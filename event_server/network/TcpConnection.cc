@@ -105,22 +105,64 @@ void TcpConnection::send(const StringPiece &message) {
 
 // FIXME efficiency!!!
 void TcpConnection::send(Buffer *buf) {
-    if (state_ == kConnected) {
-/*    if (loop_->isInLoopThread())
+    assert(state_ == kConnected);
+
+    std::cout << "send data" << std::endl;
+
+    ssize_t nwrote = 0;
+    auto data = buf->peek();
+    size_t len = buf->readableBytes();
+    size_t remaining = len;
+    bool faultError = false;
+    if (state_ == kDisconnected)
     {
-      sendInLoop(buf->peek(), buf->readableBytes());
-      buf->retrieveAll();
+        std::cout << "disconnected, give up writing" << std::endl;
+        return;
     }
-    else
+    // if no thing in output queue, try writing directly
+    if (!writeEventPtr_ && outputBuffer_.readableBytes() == 0)
     {
-      void (TcpConnection::*fp)(const StringPiece& message) = &TcpConnection::sendInLoop;
-      loop_->runInLoop(
-          std::bind(fp,
-                    this,     // FIXME
-                    buf->retrieveAllAsString()));
-                    //std::forward<string>(message)));
+        nwrote = sockets::write(socket_->fd(), data, len);
+        if (nwrote >= 0)
+        {
+            remaining = len - nwrote;
+            // event를 걸어줌
+            if (remaining == 0 && writeCompleteCallback_)
+            {
+                //loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
+                writeCompleteCallback_(shared_from_this());
+            }
+        }
+        else // nwrote < 0
+        {
+            nwrote = 0;
+            if (errno != EWOULDBLOCK)
+            {
+                std::cout << "TcpConnection::sendInLoop" << std::endl;
+                if (errno == EPIPE || errno == ECONNRESET) // FIXME: any others?
+                {
+                    faultError = true;
+                }
+            }
+        }
+    }
+
+/*    assert(remaining <= len);
+    if (!faultError && remaining > 0)
+    {
+        size_t oldLen = outputBuffer_.readableBytes();
+        if (oldLen + remaining >= highWaterMark_
+            && oldLen < highWaterMark_
+            && highWaterMarkCallback_)
+        {
+            loop_->queueInLoop(std::bind(highWaterMarkCallback_, shared_from_this(), oldLen + remaining));
+        }
+        outputBuffer_.append(static_cast<const char*>(data)+nwrote, remaining);
+        if (!channel_->isWriting())
+        {
+            channel_->enableWriting();
+        }
     }*/
-    }
 }
 
 void TcpConnection::sendInLoop(const StringPiece &message) {
@@ -287,6 +329,9 @@ FileEventPtr TcpConnection::connectEstablished() {
     // loop_->assertInLoopThread();
     //connectionCallback_(shared_from_this())
     assert(state_ == kConnecting);
+
+    std::cout << "hello" << std::endl;
+
     setState(kConnected);
     auto event = dispatcher_->createFileEvent(socket_->fd(),
                                               [this](uint32_t events) {
@@ -322,7 +367,7 @@ void TcpConnection::handleRead() {
     //loop_->assertInLoopThread();
     messageCallback_(shared_from_this(), &inputBuffer_);
 
-    // write back to client.
+/*    // write back to client.
     char wbuff[80];
     bzero(wbuff, sizeof(wbuff));
     time_t ticks = time(NULL);
@@ -330,7 +375,7 @@ void TcpConnection::handleRead() {
              "Hello from server - %.24s\r\n", ctime(&ticks));
 
     //send(inputBuffer_);
-    write(socket_->fd(), wbuff, sizeof(wbuff));
+    write(socket_->fd(), wbuff, sizeof(wbuff));*/
     event_base_dump_events(&dispatcher_->base(), stdout);
 }
 
@@ -361,6 +406,30 @@ void TcpConnection::handleWrite() {
     } else {
         //LOG_TRACE << "Connection fd = " << channel_->fd() << " is down, no more writing";
     }*/
+
+    ssize_t n = sockets::write(socket_->fd(),
+                               outputBuffer_.peek(),
+                               outputBuffer_.readableBytes());
+
+    if (n > 0) {
+        outputBuffer_.retrieve(n);
+        if (outputBuffer_.readableBytes() == 0) {
+            //channel_->disableWriting();
+            if (writeCompleteCallback_) {
+                // loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
+            }
+            if (state_ == kDisconnecting) {
+                //shutdownInLoop();
+            }
+        }
+    } else {
+        //LOG_SYSERR << "TcpConnection::handleWrite";
+        // if (state_ == kDisconnecting)
+        // {
+        //   shutdownInLoop();
+        // }
+    }
+
 }
 
 void TcpConnection::handleClose() {

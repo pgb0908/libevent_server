@@ -72,6 +72,9 @@ void Acceptor::handleRead() {
     //loop_->assertInLoopThread();
     InetAddress peerAddr;
     //FIXME loop until no more
+
+    std::cout << "accept handle read" << std::endl;
+
     int connfd = acceptSocket_.accept(&peerAddr);
     if (connfd >= 0) {
         // string hostport = peerAddr.toIpPort();

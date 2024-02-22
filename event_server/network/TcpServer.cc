@@ -83,10 +83,16 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
                                             localAddr,
                                             peerAddr));
 
-/*    conn->setConnectionCallback(connectionCallback_);
-    conn->setMessageCallback(messageCallback_);
-    conn->setWriteCompleteCallback(writeCompleteCallback_);*/
-    conn->setMessageCallback(messageCallback_);
+    conn->setWriteCompleteCallback([](const TcpConnectionPtr &conn){
+        std::cout << "send is done!!!" << std::endl;
+        conn->inputBuffer()->retrieveAll();
+        std::cout << conn->inputBuffer()->peek() << std::endl;
+    });
+    conn->setMessageCallback([](const TcpConnectionPtr &conn, Buffer *buffer)
+                                    {
+                                        size_t len = buffer->readableBytes();
+                                        conn->send(buffer);
+                                    });
     conn->setCloseCallback(
             std::bind(&TcpServer::removeConnection, this, _1)); // FIXME: unsafe
 
