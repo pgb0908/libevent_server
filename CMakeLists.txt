@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(Libevent REQUIRED)
 find_package(absl REQUIRED)
+find_package(glog REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR})
-
 
 set(event_server_lib
         event_server/event/Dispatcher.cpp
@@ -31,4 +31,5 @@ add_executable(libevent_server main.cpp ${event_server_lib})
 
 
 target_link_libraries(libevent_server
-        libevent::core)
+        libevent::core
+        glog::glog)

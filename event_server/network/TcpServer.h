@@ -18,16 +18,16 @@
 
 #include <map>
 #include <iostream>
+#include <glog/logging.h>
 
 namespace muduo {
     namespace net {
-
         class Acceptor;
 
-///
-/// TCP server, supports single-threaded and thread-pool models.
-///
-/// This is an interface class, so don't expose too much details.
+        ///
+        /// TCP server, supports single-threaded and thread-pool models.
+        ///
+        /// This is an interface class, so don't expose too much details.
         class TcpServer : noncopyable {
         public:
 
@@ -45,9 +45,7 @@ namespace muduo {
             ~TcpServer();  // force out-line dtor, for std::unique_ptr members.
 
             const string &ipPort() const { return ipPort_; }
-
             const string &name() const { return name_; }
-
             Dispatcher *dispatcher() const { return dispatcher_; }
 
             /// Set the number of threads for handling input.

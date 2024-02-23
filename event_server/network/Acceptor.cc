@@ -13,11 +13,10 @@
 
 #include <errno.h>
 #include <fcntl.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
 #include <unistd.h>
 #include <iostream>
 #include <event2/event.h>
+#include <glog/logging.h>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -49,19 +48,12 @@ void Acceptor::listen() {
     int fd = acceptSocket_.fd();
     accept_event_ = dispatcher_->createFileEvent(fd,
                                                  [this](uint32_t) {
-                                                     std::cout << "handle read..." << std::endl;
                                                      handleRead();
                                                  },
                                                  FileTriggerType::Level,
                                                  FileReadyType::Read);
 
     event_base_dump_events(&dispatcher_->base(), stdout);
-
-/*    if (accept_event_) {
-        accept_event_->setEnabled(FileReadyType::Read);
-    } else {
-        std::cout << "null file event" << std::endl;
-    }*/
 }
 
 void Acceptor::handleRead() {
@@ -70,7 +62,7 @@ void Acceptor::handleRead() {
     InetAddress peerAddr;
     //FIXME loop until no more
 
-    std::cout << "accept handle read" << std::endl;
+    LOG(INFO) << "handleRead() event occurred";
 
     int connfd = acceptSocket_.accept(&peerAddr);
     if (connfd >= 0) {

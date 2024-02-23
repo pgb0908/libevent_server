@@ -16,6 +16,8 @@
 #include <cerrno>
 #include <iostream>
 #include <event2/event.h>
+#include <glog/logging.h>
+#include <fstream>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -45,17 +47,9 @@ TcpConnection::TcpConnection(Dispatcher *dispatcher,
           localAddr_(localAddr),
           peerAddr_(peerAddr),
           highWaterMark_(64 * 1024 * 1024) {
-/*    channel_->setReadCallback(
-            std::bind(&TcpConnection::handleRead, this, _1));
-    channel_->setWriteCallback(
-            std::bind(&TcpConnection::handleWrite, this));
-    channel_->setCloseCallback(
-            std::bind(&TcpConnection::handleClose, this));
-    channel_->setErrorCallback(
-            std::bind(&TcpConnection::handleError, this));*/
 
-    std::cout << "TcpConnection::ctor[" << name_ << "] at " << this
-              << " fd=" << sockfd << std::endl;
+    LOG(INFO) << "TcpConnection::ctor[" << name_ << "] at " << this
+              << " fd=" << sockfd;
     socket_->setKeepAlive(true);
 }
 
@@ -64,7 +58,7 @@ TcpConnection::~TcpConnection() {
               << " fd=" << socket_->fd()
               << " state=" << stateToString() << std::endl;*/
     //assert(state_ == kDisconnected);
-    std::cout << "TcpConnection delete" << std::endl;
+    LOG(INFO) << "TcpConnection DESTRUCTURE";
 }
 
 bool TcpConnection::getTcpInfo(struct tcp_info *tcpi) const {
@@ -105,9 +99,6 @@ void TcpConnection::send(const StringPiece &message) {
 // FIXME efficiency!!!
 void TcpConnection::send(Buffer *buf) {
     assert(state_ == kConnected);
-
-    std::cout << "send data" << std::endl;
-
     ssize_t nwrote = 0;
     auto data = buf->peek();
     size_t len = buf->readableBytes();
@@ -115,7 +106,7 @@ void TcpConnection::send(Buffer *buf) {
     bool faultError = false;
     if (state_ == kDisconnected)
     {
-        std::cout << "disconnected, give up writing" << std::endl;
+        LOG(INFO) << "disconnected, give up writing";
         return;
     }
     // if no thing in output queue, try writing directly
@@ -125,7 +116,7 @@ void TcpConnection::send(Buffer *buf) {
         if (nwrote >= 0)
         {
             remaining = len - nwrote;
-            std::cout << "remaining : " << remaining << "   len : "<< len <<  std::endl;
+            LOG(INFO) << "remaining : " << remaining << "   len : "<< len;
             // event를 걸어줌
             if (remaining == 0 && writeCompleteCallback_)
             {
@@ -138,7 +129,7 @@ void TcpConnection::send(Buffer *buf) {
             nwrote = 0;
             if (errno != EWOULDBLOCK)
             {
-                std::cout << "TcpConnection::sendInLoop" << std::endl;
+                LOG(INFO) << "TcpConnection::sendInLoop";
                 if (errno == EPIPE || errno == ECONNRESET) // FIXME: any others?
                 {
                     faultError = true;
@@ -270,7 +261,7 @@ void TcpConnection::handleRead(uint32_t events) {
 
     int savedErrno = 0;
     ssize_t n = inputBuffer_.readFd(socket_->fd(), &savedErrno);
-    std::cout << "read from buffer size : " << n << std::endl;
+    LOG(INFO) << "read from buffer size : " << n;
 
     if (n > 0) {
         messageCallback_(shared_from_this(), &inputBuffer_);
@@ -279,7 +270,7 @@ void TcpConnection::handleRead(uint32_t events) {
         return;
     } else {
         errno = savedErrno;
-        std::cout << "TcpConnection::handleRead" << std::endl;
+        LOG(ERROR) << "TcpConnection::handleRead";
         handleError();
         return;
     }
@@ -297,7 +288,7 @@ void TcpConnection::handleRead(uint32_t events) {
 }
 
 void TcpConnection::handleWrite(uint32_t events) {
-    std::cout << "TcpConnection::handleWrite" << std::endl;
+    LOG(INFO)<< "TcpConnection::handleWrite() occurred";
     //loop_->assertInLoopThread();
 
     if (writeEventPtr_) {
@@ -308,6 +299,7 @@ void TcpConnection::handleWrite(uint32_t events) {
         if (n > 0) {
             outputBuffer_.retrieve(n);
             if (outputBuffer_.readableBytes() == 0) {
+                LOG(INFO)<< "TcpConnection::handleWrit() - sockets::write is to function normal. cancel the write event";
                 writeEventPtr_->cancelEvent();
                 if (writeCompleteCallback_) {
                     // loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
@@ -318,14 +310,14 @@ void TcpConnection::handleWrite(uint32_t events) {
                 }
             }
         } else {
-            std::cout << "TcpConnection::handleWrite Error" << std::endl;
+            LOG(ERROR) << "TcpConnection::handleWrite Error";
             // if (state_ == kDisconnecting)
             // {
             //   shutdownInLoop();
             // }
         }
     } else {
-        std::cout << "Connection fd = " << socket_->fd() << " is down, no more writing" << std::endl;
+        LOG(INFO)<< "Connection fd = " << socket_->fd() << " is down, no more writing";
     }
 
     event_base_dump_events(&dispatcher_->base(), stdout);
@@ -333,7 +325,7 @@ void TcpConnection::handleWrite(uint32_t events) {
 
 void TcpConnection::handleClose() {
     // loop_->assertInLoopThread();
-    std::cout << "fd = " << socket_->fd() << " state = " << stateToString() << std::endl;
+    LOG(INFO) << "fd = " << socket_->fd() << " state = " << stateToString();
     assert(state_ == kConnected || state_ == kDisconnecting);
     // we don't close fd, leave it to dtor, so we can find leaks easily.
     setState(kDisconnected);
@@ -341,12 +333,22 @@ void TcpConnection::handleClose() {
     TcpConnectionPtr guardThis(shared_from_this());
     closeCallback_(guardThis);
 
+    size_t size = 1024;
+    char *buffer = (char *)malloc(size); // 예시로 1024 바이트 할당
     event_base_dump_events(&dispatcher_->base(), stdout);
+    // 파일 디스크립터 생성
+/*    FILE *memstream = open_memstream(&buffer, &size);
+    event_base_dump_events(&dispatcher_->base(), memstream);
+    // 메모리 스트림 닫기
+    fclose(memstream);
+    LOG(INFO) << buffer ;
+    delete buffer;*/
+
 }
 
 void TcpConnection::handleError() {
     int err = sockets::getSocketError(socket_->fd());
-    std::cout << "TcpConnection::handleError [" << name_ << "] - SO_ERROR = " << err << " " << std::endl; //strerror_tl(err);
+    LOG(ERROR) << "TcpConnection::handleError [" << name_ << "] - SO_ERROR = " << err << " "; //strerror_tl(err);
 }
 
 

@@ -33,11 +33,12 @@ TcpServer::TcpServer(Dispatcher *dispatcher,
           nextConnId_(1) {
     acceptor_->setNewConnectionCallback(
             std::bind(&TcpServer::newConnection, this, _1, _2));
+    LOG(INFO) << "TcpServer created";
 }
 
 TcpServer::~TcpServer() {
     //loop_->assertInLoopThread();
-    //LOG_TRACE << "TcpServer::~TcpServer [" << name_ << "] destructing";
+    LOG(INFO) << "TcpServer::~TcpServer [" << name_ << "] destructing";
 
     for (auto &item: connections_) {
         TcpConnectionPtr conn(item.second);
@@ -71,9 +72,9 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
     ++nextConnId_;
     string connName = name_ + buf;
 
-    std::cout << "TcpServer::newConnection [" << name_
+    LOG(INFO) << "TcpServer::newConnection [" << name_
               << "] - new connection [" << connName
-              << "] from " << peerAddr.toIpPort() << std::endl;
+              << "] from " << peerAddr.toIpPort();
     InetAddress localAddr(sockets::getLocalAddr(sockfd));
     // FIXME poll with zero timeout to double confirm the new connection
     // FIXME use make_shared if necessary
@@ -110,8 +111,8 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
     auto temp = connections_[conn->name()];
     //temp->getReadEventPtr()->cancelEvent();
 
-    std::cout << "TcpServer::removeConnectionInLoop [" << name_
-              << "] - connection " << temp->name() << std::endl;
+    LOG(INFO) << "TcpServer::removeConnectionInLoop [" << name_
+              << "] - connection " << temp->name();
 
     size_t n = connections_.erase(conn->name());
     (void) n;
@@ -126,10 +127,9 @@ void TcpServer::doMessageDefault(const TcpConnectionPtr &conn, muduo::net::Buffe
 }
 
 void TcpServer::doWriteCompleteDefault(const TcpConnectionPtr &conn) {
-    std::cout << "send is done!!!" << std::endl;
     auto size = conn->inputBuffer()->readableBytes();
     auto data = conn->inputBuffer()->peek();
-    std::cout << "data is : " << std::string(data, size) << std::endl;
+    LOG(INFO) << "WriteComplete is done : " << std::string(data, size);
     conn->inputBuffer()->retrieveAll();
 }
 
