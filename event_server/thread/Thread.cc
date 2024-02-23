@@ -79,7 +79,7 @@ struct ThreadData
     ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
     try
     {
-      //func_();
+      func_();
       muduo::CurrentThread::t_threadName = "finished";
     }
     catch (const Exception& ex)

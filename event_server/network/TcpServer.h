@@ -83,6 +83,7 @@ namespace muduo {
 
             void doMessageDefault(const TcpConnectionPtr& conn, muduo::net::Buffer* buf);
             void doWriteCompleteDefault(const TcpConnectionPtr& conn);
+            void doThreadInitDefault();
 
             using ConnectionMap = std::map<string, TcpConnectionPtr>;
 

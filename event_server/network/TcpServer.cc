@@ -29,6 +29,9 @@ TcpServer::TcpServer(Dispatcher *dispatcher,
           name_(nameArg),
           threadPool_(new EventLoopThreadPool(dispatcher, name_)),
           acceptor_(new Acceptor(dispatcher, listenAddr, option == kReusePort)),
+          threadInitCallback_([](Dispatcher* dispatcher){
+              LOG(INFO) << "Thread init";
+          }),
           connectionCallback_(defaultConnectionCallback),
           messageCallback_(defaultMessageCallback),
           nextConnId_(1) {
@@ -132,6 +135,10 @@ void TcpServer::doWriteCompleteDefault(const TcpConnectionPtr &conn) {
     auto data = conn->inputBuffer()->peek();
     LOG(INFO) << "WriteComplete is done : " << std::string(data, size);
     conn->inputBuffer()->retrieveAll();
+}
+
+void TcpServer::doThreadInitDefault() {
+    LOG(INFO) << "Thread init";
 }
 
 /*void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn) {
