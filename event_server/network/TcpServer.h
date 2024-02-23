@@ -80,7 +80,10 @@ namespace muduo {
             /// Not thread safe, but in loop
             // void removeConnectionInLoop(const TcpConnectionPtr& conn);
 
-            typedef std::map<string, TcpConnectionPtr> ConnectionMap;
+            void doMessageDefault(const TcpConnectionPtr& conn, muduo::net::Buffer* buf);
+            void doWriteCompleteDefault(const TcpConnectionPtr& conn);
+
+            using ConnectionMap = std::map<string, TcpConnectionPtr>;
 
             Dispatcher *dispatcher_;  // the acceptor loop
             const string ipPort_;
@@ -95,22 +98,6 @@ namespace muduo {
             // always in loop thread
             int nextConnId_;
             ConnectionMap connections_;
-
-
-            void doMessageDefault(const TcpConnectionPtr& conn, muduo::net::Buffer* buf)
-            {
-                size_t len = buf->readableBytes();
-                conn->send(buf);
-            }
-
-            void doWriteCompleteDefault(const TcpConnectionPtr& conn){
-                std::cout << "send is done!!!" << std::endl;
-                auto size = conn->inputBuffer()->readableBytes();
-                auto data = conn->inputBuffer()->peek();
-                std::cout << "data is : " << std::string(data, size) << std::endl;
-                conn->inputBuffer()->retrieveAll();
-
-            }
 
         };
 

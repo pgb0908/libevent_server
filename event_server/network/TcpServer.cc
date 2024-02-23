@@ -99,7 +99,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
     //ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 
     // main-loop >> io-loop 에서 처리하도록 하는 명령함수가 필요함
-    conn->setReadEventPtr(conn->connectEstablished());
+    conn->connectEstablished();
     connections_[connName] = std::move(conn);
 
 }
@@ -117,6 +117,20 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
     (void) n;
     assert(n == 1);
 
+}
+
+void TcpServer::doMessageDefault(const TcpConnectionPtr &conn, muduo::net::Buffer *buf) {
+    //size_t len = buf->readableBytes();
+    conn->outputBuffer()->append(buf->peek(), buf->readableBytes());
+    //conn->send(buf);
+}
+
+void TcpServer::doWriteCompleteDefault(const TcpConnectionPtr &conn) {
+    std::cout << "send is done!!!" << std::endl;
+    auto size = conn->inputBuffer()->readableBytes();
+    auto data = conn->inputBuffer()->peek();
+    std::cout << "data is : " << std::string(data, size) << std::endl;
+    conn->inputBuffer()->retrieveAll();
 }
 
 /*void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn) {
