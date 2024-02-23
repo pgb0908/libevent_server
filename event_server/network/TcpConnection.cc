@@ -9,7 +9,6 @@
 #include "TcpConnection.h"
 
 #include "WeakCallback.h"
-#include "Channel.h"
 
 #include "Socket.h"
 #include "SocketsOps.h"
@@ -43,7 +42,6 @@ TcpConnection::TcpConnection(Dispatcher *dispatcher,
           state_(kConnecting),
           reading_(true),
           socket_(new Socket(sockfd)),
-        //channel_(new Channel(dispatcher, sockfd)),
           localAddr_(localAddr),
           peerAddr_(peerAddr),
           highWaterMark_(64 * 1024 * 1024) {
@@ -55,8 +53,9 @@ TcpConnection::TcpConnection(Dispatcher *dispatcher,
             std::bind(&TcpConnection::handleClose, this));
     channel_->setErrorCallback(
             std::bind(&TcpConnection::handleError, this));*/
-/*  LOG_DEBUG << "TcpConnection::ctor[" <<  name_ << "] at " << this
-            << " fd=" << sockfd;*/
+
+    std::cout << "TcpConnection::ctor[" << name_ << "] at " << this
+              << " fd=" << sockfd << std::endl;
     socket_->setKeepAlive(true);
 }
 
@@ -126,6 +125,7 @@ void TcpConnection::send(Buffer *buf) {
         if (nwrote >= 0)
         {
             remaining = len - nwrote;
+            std::cout << "remaining : " << remaining << "   len : "<< len <<  std::endl;
             // event를 걸어줌
             if (remaining == 0 && writeCompleteCallback_)
             {
@@ -147,8 +147,8 @@ void TcpConnection::send(Buffer *buf) {
         }
     }
 
-/*    assert(remaining <= len);
-    if (!faultError && remaining > 0)
+    assert(remaining <= len);
+/*    if (!faultError && remaining > 0)
     {
         size_t oldLen = outputBuffer_.readableBytes();
         if (oldLen + remaining >= highWaterMark_
@@ -337,6 +337,8 @@ FileEventPtr TcpConnection::connectEstablished() {
                                               [this](uint32_t events) {
                                                   int savedErrno = 0;
                                                   ssize_t n = inputBuffer_.readFd(socket_->fd(), &savedErrno);
+                                                  std::cout << "read from buffer size : " << n << std::endl;
+
                                                   if (n > 0) {
                                                       handleRead();
                                                   } else if (n == 0) {
@@ -366,16 +368,6 @@ void TcpConnection::connectDestroyed() {
 void TcpConnection::handleRead() {
     //loop_->assertInLoopThread();
     messageCallback_(shared_from_this(), &inputBuffer_);
-
-/*    // write back to client.
-    char wbuff[80];
-    bzero(wbuff, sizeof(wbuff));
-    time_t ticks = time(NULL);
-    snprintf(wbuff, sizeof(wbuff),
-             "Hello from server - %.24s\r\n", ctime(&ticks));
-
-    //send(inputBuffer_);
-    write(socket_->fd(), wbuff, sizeof(wbuff));*/
     event_base_dump_events(&dispatcher_->base(), stdout);
 }
 

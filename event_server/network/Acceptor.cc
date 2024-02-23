@@ -25,7 +25,6 @@ using namespace muduo::net;
 Acceptor::Acceptor(Dispatcher *dispatcher, const InetAddress &listenAddr, bool reuseport)
         : dispatcher_(dispatcher),
           acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
-          acceptChannel_(dispatcher, acceptSocket_.fd()),
           listening_(false),
           idleFd_(::open("/dev/null", O_RDONLY | O_CLOEXEC)) {
     assert(idleFd_ >= 0);
@@ -39,8 +38,6 @@ Acceptor::Acceptor(Dispatcher *dispatcher, const InetAddress &listenAddr, bool r
 }
 
 Acceptor::~Acceptor() {
-    acceptChannel_.disableAll();
-    acceptChannel_.remove();
     ::close(idleFd_);
 }
 

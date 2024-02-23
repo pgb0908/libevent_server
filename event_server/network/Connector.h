@@ -20,11 +20,6 @@
 
 namespace muduo {
     namespace net {
-
-        class Channel;
-
-        class EventLoop;
-
         class Connector : noncopyable,
                           public std::enable_shared_from_this<Connector> {
         public:
@@ -64,7 +59,6 @@ namespace muduo {
             InetAddress serverAddr_;
             bool connect_; // atomic
             States state_;  // FIXME: use atomic variable
-            std::unique_ptr<Channel> channel_;
             NewConnectionCallback newConnectionCallback_;
             int retryDelayMs_;
         };

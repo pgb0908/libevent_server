@@ -9,9 +9,7 @@
 
 #include "Connector.h"
 
-#include "Channel.h"
 #include "SocketsOps.h"
-
 #include <errno.h>
 
 using namespace muduo;
@@ -32,7 +30,6 @@ Connector::Connector(Dispatcher* dispatcher, const InetAddress& serverAddr)
 Connector::~Connector()
 {
   //LOG_DEBUG << "dtor[" << this << "]";
-  assert(!channel_);
 }
 
 void Connector::start()
@@ -126,23 +123,11 @@ void Connector::restart()
 void Connector::connecting(int sockfd)
 {
   setState(kConnecting);
-  assert(!channel_);
-  channel_.reset(new Channel(dispatcher_, sockfd));
-  channel_->setWriteCallback(
-      std::bind(&Connector::handleWrite, this)); // FIXME: unsafe
-  channel_->setErrorCallback(
-      std::bind(&Connector::handleError, this)); // FIXME: unsafe
-
-  // channel_->tie(shared_from_this()); is not working,
-  // as channel_ is not managed by shared_ptr
-  channel_->enableWriting();
 }
 
 int Connector::removeAndResetChannel()
 {
-  channel_->disableAll();
-  channel_->remove();
-  int sockfd = channel_->fd();
+  int sockfd = 0;
   // Can't reset channel_ here, because we are inside Channel::handleEvent
   //loop_->queueInLoop(std::bind(&Connector::resetChannel, this)); // FIXME: unsafe
   return sockfd;
@@ -150,7 +135,6 @@ int Connector::removeAndResetChannel()
 
 void Connector::resetChannel()
 {
-  channel_.reset();
 }
 
 void Connector::handleWrite()

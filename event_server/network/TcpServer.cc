@@ -83,18 +83,18 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
                                             localAddr,
                                             peerAddr));
 
-    conn->setWriteCompleteCallback([](const TcpConnectionPtr &conn){
-        std::cout << "send is done!!!" << std::endl;
-        conn->inputBuffer()->retrieveAll();
-        std::cout << conn->inputBuffer()->peek() << std::endl;
-    });
-    conn->setMessageCallback([](const TcpConnectionPtr &conn, Buffer *buffer)
-                                    {
-                                        size_t len = buffer->readableBytes();
-                                        conn->send(buffer);
-                                    });
+    conn->setWriteCompleteCallback(
+            [this](const TcpConnectionPtr &conn) {
+                doWriteCompleteDefault(conn);
+            });
+    conn->setMessageCallback(
+            [this](const TcpConnectionPtr &conn, Buffer *buffer) {
+                doMessageDefault(conn, buffer);
+            });
     conn->setCloseCallback(
-            std::bind(&TcpServer::removeConnection, this, _1)); // FIXME: unsafe
+            [this](const TcpConnectionPtr &conn) {
+                removeConnection(conn);
+            }); // FIXME: unsafe
 
     //ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 

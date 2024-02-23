@@ -17,7 +17,6 @@ set(event_server_lib
 
         event_server/network/Acceptor.cc
         event_server/network/Buffer.cc
-        event_server/network/Channel.cc
         event_server/network/Connector.cc
         event_server/network/InetAddress.cc
         event_server/network/Socket.cc

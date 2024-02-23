@@ -13,7 +13,6 @@
 
 #include <functional>
 
-#include "Channel.h"
 #include "Socket.h"
 #include "event_server/event/Dispatcher.h"
 
@@ -49,7 +48,6 @@ namespace muduo {
             Dispatcher *dispatcher_;
             FileEventPtr accept_event_;
             Socket acceptSocket_;
-            Channel acceptChannel_;
             NewConnectionCallback newConnectionCallback_;
             bool listening_;
             int idleFd_;

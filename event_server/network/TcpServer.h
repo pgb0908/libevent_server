@@ -17,6 +17,7 @@
 #include "event_server/event/Dispatcher.h"
 
 #include <map>
+#include <iostream>
 
 namespace muduo {
     namespace net {
@@ -96,10 +97,19 @@ namespace muduo {
             ConnectionMap connections_;
 
 
-            void onMessage(const muduo::net::TcpConnectionPtr& conn, muduo::net::Buffer* buf)
+            void doMessageDefault(const TcpConnectionPtr& conn, muduo::net::Buffer* buf)
             {
                 size_t len = buf->readableBytes();
                 conn->send(buf);
+            }
+
+            void doWriteCompleteDefault(const TcpConnectionPtr& conn){
+                std::cout << "send is done!!!" << std::endl;
+                auto size = conn->inputBuffer()->readableBytes();
+                auto data = conn->inputBuffer()->peek();
+                std::cout << "data is : " << std::string(data, size) << std::endl;
+                conn->inputBuffer()->retrieveAll();
+
             }
 
         };
