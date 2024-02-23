@@ -10,6 +10,13 @@ find_package(glog REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR})
 
 set(event_server_lib
+        event_server/common/Condition.cc
+        event_server/common/CountDownLatch.cc
+        event_server/common/Date.cc
+        event_server/common/Exception.cc
+        event_server/common/Timestamp.cc
+        event_server/common/TimeZone.cc
+
         event_server/event/Dispatcher.cpp
         event_server/event/FileEvent.cpp
         event_server/event/ImplBase.cpp
@@ -23,7 +30,12 @@ set(event_server_lib
         event_server/network/SocketsOps.cc
         event_server/network/TcpConnection.cc
         event_server/network/TcpServer.cc
-        event_server/network/Timestamp.cc
+
+        event_server/thread/CurrentThread.cc
+        event_server/thread/EventLoopThread.cc
+        event_server/thread/EventLoopThreadPool.cc
+        event_server/thread/ThreadPool.cc
+        event_server/thread/Thread.cc
 
 )
 

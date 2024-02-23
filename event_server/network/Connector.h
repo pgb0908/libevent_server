@@ -11,7 +11,7 @@
 #ifndef MUDUO_NET_CONNECTOR_H
 #define MUDUO_NET_CONNECTOR_H
 
-#include "noncopyable.h"
+#include "event_server/common/noncopyable.h"
 #include "InetAddress.h"
 #include "event_server/event/Dispatcher.h"
 

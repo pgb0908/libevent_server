@@ -7,6 +7,8 @@
 
 #include "Libevent.h"
 #include "FileEvent.h"
+#include "event_server/thread/CurrentThread.h"
+#include <glog/logging.h>
 
 class Dispatcher {
 public:
@@ -17,8 +19,16 @@ public:
     void dispatch_loop();
     event_base& base() { return *libevent_; }
 
+    void assertInLoopThread();
+    bool isInLoopThread() const { return threadId_ == muduo::CurrentThread::tid(); }
+
 private:
+    void abortNotInLoopThread();
+
+    bool looping_; /* atomic */
+    std::atomic<bool> quit_;
     BasePtr libevent_;
+    const pid_t threadId_;
 
 
 };

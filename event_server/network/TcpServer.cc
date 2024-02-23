@@ -27,6 +27,7 @@ TcpServer::TcpServer(Dispatcher *dispatcher,
         : dispatcher_(dispatcher),
           ipPort_(listenAddr.toIpPort()),
           name_(nameArg),
+          threadPool_(new EventLoopThreadPool(dispatcher, name_)),
           acceptor_(new Acceptor(dispatcher, listenAddr, option == kReusePort)),
           connectionCallback_(defaultConnectionCallback),
           messageCallback_(defaultMessageCallback),
@@ -49,12 +50,12 @@ TcpServer::~TcpServer() {
 
 void TcpServer::setThreadNum(int numThreads) {
     assert(0 <= numThreads);
-    //threadPool_->setThreadNum(numThreads);
+    threadPool_->setThreadNum(numThreads);
 }
 
 void TcpServer::start() {
     if (started_.getAndSet(1) == 0) {
-        //threadPool_->start(threadInitCallback_);
+        threadPool_->start(threadInitCallback_);
         assert(!acceptor_->listening());
         acceptor_->listen();
 

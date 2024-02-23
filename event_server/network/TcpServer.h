@@ -12,9 +12,10 @@
 #define MUDUO_NET_TCPSERVER_H
 
 #include "Atomic.h"
-#include "Types.h"
+#include "event_server/common/Types.h"
 #include "TcpConnection.h"
 #include "event_server/event/Dispatcher.h"
+#include "event_server/thread/EventLoopThreadPool.h"
 
 #include <map>
 #include <iostream>
@@ -23,7 +24,7 @@
 namespace muduo {
     namespace net {
         class Acceptor;
-
+        typedef std::function<void(Dispatcher*)> ThreadInitCallback;
         ///
         /// TCP server, supports single-threaded and thread-pool models.
         ///
@@ -59,9 +60,11 @@ namespace muduo {
             /// - N means a thread pool with N threads, new connections
             ///   are assigned on a round-robin basis.
             void setThreadNum(int numThreads);
+            void setThreadInitCallback(const ThreadInitCallback& cb)
+            { threadInitCallback_ = cb; }
 
             /// valid after calling start()
-            //std::shared_ptr<EventLoopThreadPool> threadPool(){ return threadPool_; }
+            std::shared_ptr<EventLoopThreadPool> threadPool(){ return threadPool_; }
 
             /// Starts the server if it's not listening.
             ///
@@ -87,10 +90,11 @@ namespace muduo {
             const string ipPort_;
             const string name_;
             std::unique_ptr<Acceptor> acceptor_; // avoid revealing Acceptor
-            //std::shared_ptr<EventLoopThreadPool> threadPool_;
+            std::shared_ptr<EventLoopThreadPool> threadPool_;
             ConnectionCallback connectionCallback_;
             MessageCallback messageCallback_;
             WriteCompleteCallback writeCompleteCallback_;
+            ThreadInitCallback threadInitCallback_;
 
             AtomicInt32 started_;
             // always in loop thread

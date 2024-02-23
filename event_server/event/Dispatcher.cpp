@@ -6,19 +6,22 @@
 #include <iostream>
 #include "Dispatcher.h"
 
-Dispatcher::Dispatcher() {
-    event_base* event_base = event_base_new();
+Dispatcher::Dispatcher() :
+looping_(false),
+quit_(false),
+        threadId_(muduo::CurrentThread::tid()) {
+    event_base *event_base = event_base_new();
     libevent_ = BasePtr(event_base);
 }
 
 
 void Dispatcher::dispatch_loop() {
-    std::cout  << "event loop~~~" << std::endl;
+    std::cout << "event loop~~~" << std::endl;
     event_base_dispatch(libevent_.get());
 
 }
 
-FileEventPtr Dispatcher::createFileEvent(int fd, const FileReadyCb& cb, FileTriggerType trigger, uint32_t events) {
+FileEventPtr Dispatcher::createFileEvent(int fd, const FileReadyCb &cb, FileTriggerType trigger, uint32_t events) {
     auto fileEvent = std::make_unique<FileEvent>(*this, fd,
                                                  [this, cb](uint32_t events) {
                                                      cb(events);
@@ -27,4 +30,16 @@ FileEventPtr Dispatcher::createFileEvent(int fd, const FileReadyCb& cb, FileTrig
                                                  events);
 
     return fileEvent;
+}
+
+void Dispatcher::assertInLoopThread() {
+    if (!isInLoopThread()) {
+        abortNotInLoopThread();
+    }
+}
+
+void Dispatcher::abortNotInLoopThread() {
+    LOG(ERROR) << "EventLoop::abortNotInLoopThread - EventLoop " << this
+               << " was created in threadId_ = " << threadId_
+               << ", current thread id = " << muduo::CurrentThread::tid();
 }

@@ -6,7 +6,7 @@
 #ifndef MUDUO_BASE_TIMESTAMP_H
 #define MUDUO_BASE_TIMESTAMP_H
 
-#include "event_server/common/copyable.h"
+#include "copyable.h"
 #include "Types.h"
 
 #include <boost/operators.hpp>

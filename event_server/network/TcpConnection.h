@@ -11,9 +11,9 @@
 #ifndef MUDUO_NET_TCPCONNECTION_H
 #define MUDUO_NET_TCPCONNECTION_H
 
-#include "noncopyable.h"
+#include "event_server/common/noncopyable.h"
 #include "StringPiece.h"
-#include "Types.h"
+#include "event_server/common/Types.h"
 #include "Callbacks.h"
 #include "Buffer.h"
 #include "InetAddress.h"

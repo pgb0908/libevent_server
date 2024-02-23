@@ -11,7 +11,7 @@
 #ifndef MUDUO_NET_SOCKET_H
 #define MUDUO_NET_SOCKET_H
 
-#include "noncopyable.h"
+#include "event_server/common/noncopyable.h"
 
 // struct tcp_info is in <netinet/tcp.h>
 struct tcp_info;

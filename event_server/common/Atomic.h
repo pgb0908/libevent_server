@@ -6,7 +6,7 @@
 #ifndef MUDUO_BASE_ATOMIC_H
 #define MUDUO_BASE_ATOMIC_H
 
-#include "event_server/common/noncopyable.h"
+#include "noncopyable.h"
 
 #include <stdint.h>
 
