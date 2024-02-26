@@ -102,6 +102,8 @@ namespace muduo {
             int nextConnId_;
             ConnectionMap connections_;
 
+
+
         };
 
     }  // namespace net

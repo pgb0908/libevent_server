@@ -68,7 +68,7 @@ void EventLoopThread::threadFunc()
   }
 
   loop.dispatch_loop();
-  assert(exiting_);
+  assert(!exiting_);
   MutexLockGuard lock(mutex_);
   loop_ = NULL;
 }

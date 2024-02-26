@@ -30,14 +30,14 @@ TcpServer::TcpServer(Dispatcher *dispatcher,
           threadPool_(new EventLoopThreadPool(dispatcher, name_)),
           acceptor_(new Acceptor(dispatcher, listenAddr, option == kReusePort)),
           threadInitCallback_([](Dispatcher* dispatcher){
-              LOG(INFO) << "Thread init";
+              LOG(INFO) <<  "Thread init. " << "thread-id : " <<dispatcher->getThreadId();
           }),
           connectionCallback_(defaultConnectionCallback),
           messageCallback_(defaultMessageCallback),
           nextConnId_(1) {
     acceptor_->setNewConnectionCallback(
             std::bind(&TcpServer::newConnection, this, _1, _2));
-    LOG(INFO) << "TcpServer created";
+    LOG(INFO) << "TcpServer created. " << "thread-id : " <<dispatcher_->getThreadId();
 }
 
 TcpServer::~TcpServer() {
@@ -62,15 +62,17 @@ void TcpServer::start() {
         assert(!acceptor_->listening());
         acceptor_->listen();
 
+        auto aa= dispatcher_->createSchedulableCallback([this](){
+            dispatcher_->printRegistEvent();
+        });
+
         dispatcher_->dispatch_loop();
     }
-
-
 }
 
 void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
     //loop_->assertInLoopThread();
-    //EventLoop* ioLoop = threadPool_->getNextLoop();
+    Dispatcher* ioLoop = threadPool_->getNextLoop();
     char buf[64];
     snprintf(buf, sizeof buf, "-%s#%d", ipPort_.c_str(), nextConnId_);
     ++nextConnId_;
@@ -104,7 +106,10 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
     //ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 
     // main-loop >> io-loop 에서 처리하도록 하는 명령함수가 필요함
-    conn->connectEstablished();
+    ioLoop->createSchedulableCallback([&conn](){
+        conn->connectEstablished();
+    });
+
     connections_[connName] = std::move(conn);
 
 }

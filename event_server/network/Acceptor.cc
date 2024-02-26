@@ -42,6 +42,7 @@ Acceptor::~Acceptor() {
 
 void Acceptor::listen() {
     //loop_->assertInLoopThread();
+    assert(dispatcher_->isInLoopThread());
     listening_ = true;
     if (!acceptSocket_.listen()) return;
 

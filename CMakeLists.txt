@@ -21,6 +21,8 @@ set(event_server_lib
         event_server/event/FileEvent.cpp
         event_server/event/ImplBase.cpp
         event_server/event/Libevent.cpp
+        event_server/event/schedulCallback.cpp
+
 
         event_server/network/Acceptor.cc
         event_server/network/Buffer.cc
