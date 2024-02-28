@@ -13,7 +13,7 @@ using namespace muduo::net;
 
 EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
                                  const string& name)
-  : loop_(NULL),
+  : loop_(Dispatcher()),
     exiting_(false),
     thread_(std::bind(&EventLoopThread::threadFunc, this), name),
     mutex_(),
@@ -25,36 +25,41 @@ EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
 EventLoopThread::~EventLoopThread()
 {
   exiting_ = true;
-  if (loop_ != NULL) // not 100% race-free, eg. threadFunc could be running callback_.
+/*  if (loop_ != NULL) // not 100% race-free, eg. threadFunc could be running callback_.
   {
     // still a tiny chance to call destructed object, if threadFunc exits just now.
     // but when EventLoopThread destructs, usually programming is exiting anyway.
     //loop_->quit();
     thread_.join();
-  }
+  }*/
+
+    thread_.join();
 }
 
 Dispatcher* EventLoopThread::startLoop()
 {
-  assert(!thread_.started());
-  thread_.start();
+    LOG(INFO) << "EventLoopThread,startLoop";
+    assert(!thread_.started());
+    thread_.start(); // thread_local init
 
-    Dispatcher* loop = NULL;
-  {
-    MutexLockGuard lock(mutex_);
-    while (loop_ == NULL)
+/*    Dispatcher *loop = nullptr;
     {
-      cond_.wait();
-    }
-    loop = loop_;
-  }
+        MutexLockGuard lock(mutex_);
+        while (loop_ == NULL) {
+            cond_.wait();
+        }
+        loop = loop_;
+    }*/
 
-  return loop;
+    return &loop_;
 }
 
 void EventLoopThread::threadFunc()
 {
-  Dispatcher loop;
+    LOG(INFO) << "EventLoopThread - threadFunc" << "[" << thread_.name() << "]";
+    loop_.dispatch_loop();
+    //loop_->dispatch_loop();
+/*  Dispatcher loop;
 
   if (callback_)
   {
@@ -70,6 +75,6 @@ void EventLoopThread::threadFunc()
   loop.dispatch_loop();
   assert(!exiting_);
   MutexLockGuard lock(mutex_);
-  loop_ = NULL;
+  loop_ = NULL;*/
 }
 

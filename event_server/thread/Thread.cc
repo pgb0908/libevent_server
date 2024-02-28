@@ -75,6 +75,8 @@ struct ThreadData
     latch_->countDown();
     latch_ = NULL;
 
+    LOG(INFO) << "Thread - runInThread" << "[" << name_ << "]";
+
     muduo::CurrentThread::t_threadName = name_.empty() ? "muduoThread" : name_.c_str();
     ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
     try
@@ -175,6 +177,7 @@ void Thread::start()
 {
   assert(!started_);
   started_ = true;
+    LOG(ERROR) << "Thread - start";
   // FIXME: move(func_)
   detail::ThreadData* data = new detail::ThreadData(func_, name_, &tid_, &latch_);
   if (pthread_create(&pthreadId_, NULL, &detail::startThread, data))

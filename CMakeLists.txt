@@ -9,6 +9,8 @@ find_package(glog REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
+add_executable(libevent_server main.cpp)
+
 set(event_server_lib
         event_server/common/Condition.cc
         event_server/common/CountDownLatch.cc
@@ -21,7 +23,8 @@ set(event_server_lib
         event_server/event/FileEvent.cpp
         event_server/event/ImplBase.cpp
         event_server/event/Libevent.cpp
-        event_server/event/schedulCallback.cpp
+        event_server/event/LibEventSchedular.cpp
+        event_server/event/SchedularCallback.cpp
 
 
         event_server/network/Acceptor.cc
@@ -41,9 +44,13 @@ set(event_server_lib
 
 )
 
-add_executable(libevent_server main.cpp ${event_server_lib})
-
-
-target_link_libraries(libevent_server
+add_library(event ${event_server_lib})
+target_link_libraries(event
         libevent::core
         glog::glog)
+
+target_link_libraries(libevent_server
+        event)
+
+
+add_subdirectory(test/event)

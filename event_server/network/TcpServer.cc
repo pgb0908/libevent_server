@@ -62,7 +62,7 @@ void TcpServer::start() {
         assert(!acceptor_->listening());
         acceptor_->listen();
 
-        auto aa= dispatcher_->createSchedulableCallback([this](){
+        dispatcher_->post([this](){
             dispatcher_->printRegistEvent();
         });
 
@@ -106,7 +106,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
     //ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 
     // main-loop >> io-loop 에서 처리하도록 하는 명령함수가 필요함
-    ioLoop->createSchedulableCallback([&conn](){
+    ioLoop->post([&conn](){
         conn->connectEstablished();
     });
 

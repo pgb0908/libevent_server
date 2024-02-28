@@ -9,16 +9,18 @@
 #include "FileEvent.h"
 #include "event_server/thread/CurrentThread.h"
 #include "event_server/common/Mutex.h"
-#include "schedulCallback.h"
 #include <glog/logging.h>
 #include <list>
 
 using PostCb = std::function<void()>;
 
+class SchedulCallbackPtr;
+
 class Dispatcher {
 public:
 
     Dispatcher();
+    ~Dispatcher();
 
     /**
      * 다른 io 쓰레드에게 명령
@@ -56,6 +58,8 @@ public:
 
 private:
     void abortNotInLoopThread();
+
+    void runPostCallbacks();
 
     bool looping_; /* atomic */
     std::atomic<bool> quit_;
