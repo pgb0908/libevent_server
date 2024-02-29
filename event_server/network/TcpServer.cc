@@ -66,7 +66,7 @@ void TcpServer::start() {
             dispatcher_->printRegistEvent();
         });
 
-        dispatcher_->dispatch_loop();
+        dispatcher_->dispatch_loop(Event::Dispatcher::RunType::Block);
     }
 }
 

@@ -26,9 +26,10 @@ namespace Event {
     }
 
 
-    void DispatcherImp::dispatch_loop() {
+    void DispatcherImp::dispatch_loop(Dispatcher::RunType type) {
         LOG(INFO) << "loop start";
-        event_base_dispatch(&base_scheduler_.base());
+        base_scheduler_.run(type);
+        //event_base_dispatch(&base_scheduler_.base());
 
     }
 
@@ -129,5 +130,9 @@ namespace Event {
     DispatcherImp::~DispatcherImp() {
         LOG(INFO) << "EventLoop " << this << " of thread " << threadId_
                   << " destructs in thread " << muduo::CurrentThread::tid();
+    }
+
+    void DispatcherImp::exit() {
+        base_scheduler_.loopExit();
     }
 }

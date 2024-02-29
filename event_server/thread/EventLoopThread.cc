@@ -57,7 +57,7 @@ Event::DispatcherImp* EventLoopThread::startLoop()
 void EventLoopThread::threadFunc()
 {
     LOG(INFO) << "EventLoopThread - threadFunc" << "[" << thread_.name() << "]";
-    loop_.dispatch_loop();
+    loop_.dispatch_loop(Event::Dispatcher::RunType::Block);
     //loop_->dispatch_loop();
 /*  Dispatcher loop;
 

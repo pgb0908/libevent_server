@@ -37,7 +37,7 @@ namespace Event {
         /**
          * run event-loop
          */
-        void dispatch_loop();
+        void dispatch_loop(Dispatcher::RunType type);
 
         void assertInLoopThread();
 
@@ -52,6 +52,8 @@ namespace Event {
         }
 
         void printRegistEvent();
+
+        void exit();
 
 
     private:
