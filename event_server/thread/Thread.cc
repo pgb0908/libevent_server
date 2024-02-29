@@ -177,7 +177,6 @@ void Thread::start()
 {
   assert(!started_);
   started_ = true;
-    LOG(ERROR) << "Thread - start";
   // FIXME: move(func_)
   detail::ThreadData* data = new detail::ThreadData(func_, name_, &tid_, &latch_);
   if (pthread_create(&pthreadId_, NULL, &detail::startThread, data))

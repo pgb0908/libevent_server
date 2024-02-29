@@ -59,4 +59,4 @@ target_link_libraries(libevent_server
         event)
 
 
-add_subdirectory(test/event)
+add_subdirectory(test)
