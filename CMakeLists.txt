@@ -53,8 +53,7 @@ target_link_libraries(event
         libevent::pthreads
         libevent::core
         glog::glog
-        GTest::gtest_main
-        GTest::gtest)
+)
 
 target_link_libraries(libevent_server
         event)

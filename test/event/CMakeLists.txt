@@ -4,4 +4,6 @@ add_executable(test_event main.cpp
 )
 
 target_link_libraries(test_event
-        event)
+        event
+        GTest::gtest_main
+        GTest::gtest)
