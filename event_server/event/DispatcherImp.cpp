@@ -11,10 +11,12 @@
 #include "event_server/common/Mutex.h"
 #include "file_event_impl.h"
 #include "schedulable_cb_impl.h"
+#include "real_time_system.h"
 
 namespace Event {
 
     DispatcherImp::DispatcherImp() :
+            time_source_(RealTimeSystem()),
             looping_(false),
             quit_(false),
             post_cb_(base_scheduler_.createSchedulableCallback([this]() {
@@ -22,6 +24,9 @@ namespace Event {
                 runPostCallbacks();
             })),
             threadId_(muduo::CurrentThread::tid()) {
+
+        base_scheduler_.registerOnPrepareCallback(
+                std::bind(&DispatcherImp::updateApproximateMonotonicTime, this));
 
     }
 
@@ -134,5 +139,13 @@ namespace Event {
 
     void DispatcherImp::exit() {
         base_scheduler_.loopExit();
+    }
+
+    void DispatcherImp::updateApproximateMonotonicTime() {
+        updateApproximateMonotonicTimeInternal();
+    }
+
+    void DispatcherImp::updateApproximateMonotonicTimeInternal() {
+        approximate_monotonic_time_ = time_source_.monotonicTime();
     }
 }

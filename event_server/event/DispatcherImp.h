@@ -12,6 +12,7 @@
 #include "dispatcher.h"
 #include "libevent.h"
 #include "libevent_scheduler.h"
+#include "real_time_system.h"
 
 
 namespace Event {
@@ -57,6 +58,9 @@ namespace Event {
 
 
     private:
+        void updateApproximateMonotonicTime();
+        void updateApproximateMonotonicTimeInternal();
+
         void abortNotInLoopThread();
 
         void runPostCallbacks();
@@ -68,6 +72,8 @@ namespace Event {
         std::list<PostCb> post_callbacks_;
         muduo::MutexLock mutex_;
         SchedulableCallbackPtr post_cb_;
+        MonotonicTime approximate_monotonic_time_;
+        Event::RealTimeSystem time_source_;
 
 
     };
