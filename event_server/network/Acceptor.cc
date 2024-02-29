@@ -21,7 +21,7 @@
 using namespace muduo;
 using namespace muduo::net;
 
-Acceptor::Acceptor(Dispatcher *dispatcher, const InetAddress &listenAddr, bool reuseport)
+Acceptor::Acceptor(Event::DispatcherImp *dispatcher, const InetAddress &listenAddr, bool reuseport)
         : dispatcher_(dispatcher),
           acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
           listening_(false),
@@ -51,8 +51,8 @@ void Acceptor::listen() {
                                                  [this](uint32_t) {
                                                      handleRead();
                                                  },
-                                                 FileTriggerType::Level,
-                                                 FileReadyType::Read);
+                                                 Event::FileTriggerType::Level,
+                                                 Event::FileReadyType::Read);
 
     event_base_dump_events(&dispatcher_->base(), stdout);
 }

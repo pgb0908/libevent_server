@@ -14,13 +14,13 @@
 #include <stdio.h>  // snprintf
 #include <iostream>
 #include <csignal>
-#include "event_server/event/Dispatcher.h"
+#include "event_server/event/DispatcherImp.h"
 
 using namespace muduo;
 using namespace muduo::net;
 
 
-TcpServer::TcpServer(Dispatcher *dispatcher,
+TcpServer::TcpServer(Event::DispatcherImp *dispatcher,
                      const InetAddress &listenAddr,
                      const string &nameArg,
                      Option option)
@@ -29,7 +29,7 @@ TcpServer::TcpServer(Dispatcher *dispatcher,
           name_(nameArg),
           threadPool_(new EventLoopThreadPool(dispatcher, name_)),
           acceptor_(new Acceptor(dispatcher, listenAddr, option == kReusePort)),
-          threadInitCallback_([](Dispatcher* dispatcher){
+          threadInitCallback_([](Event::DispatcherImp* dispatcher){
               LOG(INFO) <<  "Thread init. " << "thread-id : " <<dispatcher->getThreadId();
           }),
           connectionCallback_(defaultConnectionCallback),
@@ -72,7 +72,7 @@ void TcpServer::start() {
 
 void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
     //loop_->assertInLoopThread();
-    Dispatcher* ioLoop = threadPool_->getNextLoop();
+    Event::DispatcherImp* ioLoop = threadPool_->getNextLoop();
     char buf[64];
     snprintf(buf, sizeof buf, "-%s#%d", ipPort_.c_str(), nextConnId_);
     ++nextConnId_;

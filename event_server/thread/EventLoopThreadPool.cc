@@ -16,7 +16,7 @@
 using namespace muduo;
 using namespace muduo::net;
 
-EventLoopThreadPool::EventLoopThreadPool(Dispatcher *baseLoop, string nameArg)
+EventLoopThreadPool::EventLoopThreadPool(Event::DispatcherImp *baseLoop, string nameArg)
         : baseLoop_(baseLoop),
           name_(std::move(nameArg)),
           started_(false),
@@ -47,10 +47,10 @@ void EventLoopThreadPool::start(const ThreadInitCallback &cb) {
     }
 }
 
-Dispatcher *EventLoopThreadPool::getNextLoop() {
+Event::DispatcherImp *EventLoopThreadPool::getNextLoop() {
     baseLoop_->assertInLoopThread();
     assert(started_);
-    Dispatcher *loop = baseLoop_;
+    Event::DispatcherImp *loop = baseLoop_;
 
     if (!loops_.empty()) {
         // round-robin
@@ -63,9 +63,9 @@ Dispatcher *EventLoopThreadPool::getNextLoop() {
     return loop;
 }
 
-Dispatcher *EventLoopThreadPool::getLoopForHash(size_t hashCode) {
+Event::DispatcherImp *EventLoopThreadPool::getLoopForHash(size_t hashCode) {
     baseLoop_->assertInLoopThread();
-    Dispatcher *loop = baseLoop_;
+    Event::DispatcherImp *loop = baseLoop_;
 
     if (!loops_.empty()) {
         loop = loops_[hashCode % loops_.size()];
@@ -73,11 +73,11 @@ Dispatcher *EventLoopThreadPool::getLoopForHash(size_t hashCode) {
     return loop;
 }
 
-std::vector<Dispatcher *> EventLoopThreadPool::getAllLoops() {
+std::vector<Event::DispatcherImp *> EventLoopThreadPool::getAllLoops() {
     baseLoop_->assertInLoopThread();
     assert(started_);
     if (loops_.empty()) {
-        return std::vector<Dispatcher *>(1, baseLoop_);
+        return std::vector<Event::DispatcherImp *>(1, baseLoop_);
     } else {
         return loops_;
     }

@@ -14,7 +14,7 @@
 #include "event_server/common/Mutex.h"
 #include "event_server/common/Condition.h"
 #include "event_server/common/CountDownLatch.h"
-#include "event_server/event/Dispatcher.h"
+#include "event_server/event/DispatcherImp.h"
 
 #include "Thread.h"
 
@@ -23,19 +23,19 @@ namespace muduo {
 
         class EventLoopThread : noncopyable {
         public:
-            typedef std::function<void(Dispatcher *)> ThreadInitCallback;
+            typedef std::function<void(Event::DispatcherImp *)> ThreadInitCallback;
 
             EventLoopThread(const ThreadInitCallback &cb = ThreadInitCallback(),
                             const string &name = string());
 
             ~EventLoopThread();
 
-            Dispatcher *startLoop();
+            Event::DispatcherImp *startLoop();
 
         private:
             void threadFunc();
 
-            Dispatcher loop_;
+            Event::DispatcherImp loop_;
             bool exiting_;
             Thread thread_;
             MutexLock mutex_;

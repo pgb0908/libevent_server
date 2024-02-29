@@ -13,7 +13,7 @@
 
 #include "event_server/common/Types.h"
 #include "event_server/common/noncopyable.h"
-#include "event_server/event/Dispatcher.h"
+#include "event_server/event/DispatcherImp.h"
 
 #include <functional>
 #include <memory>
@@ -26,9 +26,9 @@ namespace muduo {
 
         class EventLoopThreadPool : noncopyable {
         public:
-            typedef std::function<void(Dispatcher *)> ThreadInitCallback;
+            typedef std::function<void(Event::DispatcherImp *)> ThreadInitCallback;
 
-            EventLoopThreadPool(Dispatcher *baseLoop, string nameArg);
+            EventLoopThreadPool(Event::DispatcherImp *baseLoop, string nameArg);
             ~EventLoopThreadPool();
 
             void setThreadNum(int numThreads) { numThreads_ = numThreads; }
@@ -36,23 +36,23 @@ namespace muduo {
 
             // valid after calling start()
             /// round-robin
-            Dispatcher *getNextLoop();
+            Event::DispatcherImp *getNextLoop();
 
             /// with the same hash code, it will always return the same EventLoop
-            Dispatcher *getLoopForHash(size_t hashCode);
+            Event::DispatcherImp *getLoopForHash(size_t hashCode);
 
-            std::vector<Dispatcher *> getAllLoops();
+            std::vector<Event::DispatcherImp *> getAllLoops();
             bool started() const { return started_; }
             const string &name() const { return name_; }
 
         private:
-            Dispatcher *baseLoop_;
+            Event::DispatcherImp *baseLoop_;
             string name_;
             bool started_;
             int numThreads_;
             int next_;
             std::vector<std::unique_ptr<EventLoopThread>> threads_;
-            std::vector<Dispatcher *> loops_;
+            std::vector<Event::DispatcherImp *> loops_;
         };
 
     }  // namespace net

@@ -19,12 +19,15 @@ set(event_server_lib
         event_server/common/Timestamp.cc
         event_server/common/TimeZone.cc
 
-        event_server/event/Dispatcher.cpp
-        event_server/event/FileEvent.cpp
-        event_server/event/ImplBase.cpp
-        event_server/event/Libevent.cpp
-        event_server/event/LibEventSchedular.cpp
-        event_server/event/SchedularCallback.cpp
+        event_server/event/DispatcherImp.cpp
+        event_server/event/event_impl_base.cc
+        event_server/event/file_event_impl.cc
+        event_server/event/libevent.cc
+        event_server/event/libevent_scheduler.cc
+        event_server/event/real_time_system.cc
+        event_server/event/scaled_range_timer_manager_impl.cc
+        event_server/event/schedulable_cb_impl.cc
+        event_server/event/timer_impl.cc
 
 
         event_server/network/Acceptor.cc
@@ -46,6 +49,7 @@ set(event_server_lib
 
 add_library(event ${event_server_lib})
 target_link_libraries(event
+        libevent::pthreads
         libevent::core
         glog::glog)
 

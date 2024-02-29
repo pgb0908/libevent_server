@@ -4,13 +4,14 @@
 
 #include <iostream>
 #include <event2/event.h>
-#include "event_server/event/Dispatcher.h"
+#include "event_server/event/DispatcherImp.h"
 
 int main(int argc, char* argv[]){
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-    auto dispatcher = Dispatcher();
+    Event::Libevent::Global::initialize();
+    auto dispatcher = Event::DispatcherImp();
     auto testCallback = dispatcher.createSchedulableCallback(
             []() {
                 std::cout << "hello" << std::endl;
@@ -21,12 +22,12 @@ int main(int argc, char* argv[]){
 
     testCallback->enabled();
 
-/*    dispatcher.post(
+    dispatcher.post(
             []() {
                 std::cout << "hello" << std::endl;
             }
 
-            );*/
+            );
 
     dispatcher.dispatch_loop();
 

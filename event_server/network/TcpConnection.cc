@@ -34,7 +34,7 @@ void muduo::net::defaultMessageCallback(const TcpConnectionPtr &,
     buf->retrieveAll();
 }
 
-TcpConnection::TcpConnection(Dispatcher *dispatcher,
+TcpConnection::TcpConnection(Event::DispatcherImp *dispatcher,
                              const string &nameArg,
                              int sockfd,
                              const InetAddress &localAddr,
@@ -242,8 +242,8 @@ void TcpConnection::connectEstablished() {
                                               [this](uint32_t events) {
                                                   handleRead(events);
                                               },
-                                              FileTriggerType::Level,
-                                              FileReadyType::Read);
+                                                 Event::FileTriggerType::Level,
+                                                 Event::FileReadyType::Read);
 }
 
 void TcpConnection::connectDestroyed() {
@@ -280,8 +280,8 @@ void TcpConnection::handleRead(uint32_t events) {
                                                       [this](uint32_t events) {
                                                           handleWrite(events);
                                                       },
-                                                      FileTriggerType::Level,
-                                                      FileReadyType::Write);
+                                                      Event::FileTriggerType::Level,
+                                                      Event::FileReadyType::Write);
     }
 
     event_base_dump_events(&dispatcher_->base(), stdout);
@@ -300,7 +300,7 @@ void TcpConnection::handleWrite(uint32_t events) {
             outputBuffer_.retrieve(n);
             if (outputBuffer_.readableBytes() == 0) {
                 LOG(INFO)<< "TcpConnection::handleWrit() - sockets::write is to function normal. cancel the write event";
-                writeEventPtr_->cancelEvent();
+                // todo writeEventPtr_ canceal??;
                 if (writeCompleteCallback_) {
                     // loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
                     writeCompleteCallback_(shared_from_this());

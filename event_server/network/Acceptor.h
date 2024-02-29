@@ -14,7 +14,7 @@
 #include <functional>
 
 #include "Socket.h"
-#include "event_server/event/Dispatcher.h"
+#include "event_server/event/DispatcherImp.h"
 
 namespace muduo {
     namespace net {
@@ -28,7 +28,7 @@ namespace muduo {
         public:
             typedef std::function<void(int sockfd, const InetAddress &)> NewConnectionCallback;
 
-            Acceptor(Dispatcher *dispatcher, const InetAddress &listenAddr, bool reuseport);
+            Acceptor(Event::DispatcherImp *dispatcher, const InetAddress &listenAddr, bool reuseport);
 
             ~Acceptor();
 
@@ -45,8 +45,8 @@ namespace muduo {
             void handleRead();
 
         private:
-            Dispatcher *dispatcher_;
-            FileEventPtr accept_event_;
+            Event::DispatcherImp *dispatcher_;
+            Event::FileEventPtr accept_event_;
             Socket acceptSocket_;
             NewConnectionCallback newConnectionCallback_;
             bool listening_;

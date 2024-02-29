@@ -13,7 +13,7 @@ using namespace muduo::net;
 
 EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
                                  const string& name)
-  : loop_(Dispatcher()),
+  : loop_(Event::DispatcherImp()),
     exiting_(false),
     thread_(std::bind(&EventLoopThread::threadFunc, this), name),
     mutex_(),
@@ -36,7 +36,7 @@ EventLoopThread::~EventLoopThread()
     thread_.join();
 }
 
-Dispatcher* EventLoopThread::startLoop()
+Event::DispatcherImp* EventLoopThread::startLoop()
 {
     LOG(INFO) << "EventLoopThread,startLoop";
     assert(!thread_.started());

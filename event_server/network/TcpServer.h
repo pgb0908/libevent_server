@@ -14,7 +14,7 @@
 #include "Atomic.h"
 #include "event_server/common/Types.h"
 #include "TcpConnection.h"
-#include "event_server/event/Dispatcher.h"
+#include "event_server/event/DispatcherImp.h"
 #include "event_server/thread/EventLoopThreadPool.h"
 
 #include <map>
@@ -24,7 +24,7 @@
 namespace muduo {
     namespace net {
         class Acceptor;
-        typedef std::function<void(Dispatcher*)> ThreadInitCallback;
+        typedef std::function<void(Event::DispatcherImp*)> ThreadInitCallback;
         ///
         /// TCP server, supports single-threaded and thread-pool models.
         ///
@@ -38,7 +38,7 @@ namespace muduo {
             };
 
             //TcpServer(EventLoop* loop, const InetAddress& listenAddr);
-            TcpServer(Dispatcher *dispatcher,
+            TcpServer(Event::DispatcherImp *dispatcher,
                       const InetAddress &listenAddr,
                       const string &nameArg,
                       Option option = kNoReusePort);
@@ -47,7 +47,7 @@ namespace muduo {
 
             const string &ipPort() const { return ipPort_; }
             const string &name() const { return name_; }
-            Dispatcher *dispatcher() const { return dispatcher_; }
+            Event::DispatcherImp *dispatcher() const { return dispatcher_; }
 
             /// Set the number of threads for handling input.
             ///
@@ -87,7 +87,7 @@ namespace muduo {
 
             using ConnectionMap = std::map<string, TcpConnectionPtr>;
 
-            Dispatcher *dispatcher_;  // the acceptor loop
+            Event::DispatcherImp *dispatcher_;  // the acceptor loop
             const string ipPort_;
             const string name_;
             std::unique_ptr<Acceptor> acceptor_; // avoid revealing Acceptor

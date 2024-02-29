@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
     LOG(INFO) << "TCP server start";
-    auto dispatcherImpl = Dispatcher();
+    auto dispatcherImpl = DispatcherImp();
     muduo::net::InetAddress listenAddr("192.168.15.130",9990);
     muduo::net::TcpServer tcpServer = muduo::net::TcpServer(&dispatcherImpl, listenAddr, "tcp-server");
     tcpServer.setThreadNum(1);
