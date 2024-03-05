@@ -19,9 +19,9 @@ TEST(thread_pool, test01){
         std::cout << dispatcherImp->getThreadId() << std::endl;
     });
 
-    for(auto loop : eventLoopThreadPool.getAllLoops()){
+/*    for(auto loop : eventLoopThreadPool.getAllLoops()){
         std::cout << loop->getThreadId() <<  " ";
-    }std::cout << std::endl;
+    }std::cout << std::endl;*/
 
 
 }
