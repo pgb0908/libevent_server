@@ -35,6 +35,8 @@ void EventLoopThreadPool::start(const ThreadInitCallback &cb) {
 
     started_ = true;
 
+    LOG(INFO) << "EventLoopThreadPool - number of IO thread[" << numThreads_ << "]";
+
     for (int i = 0; i < numThreads_; ++i) {
         char buf[name_.size() + 32];
         snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);

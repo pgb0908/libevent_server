@@ -39,6 +39,7 @@ namespace muduo {
             bool exiting_;
             Thread thread_;
             MutexLock mutex_;
+            MutexLock mutex2_;
             Condition cond_ GUARDED_BY(mutex_);
             ThreadInitCallback callback_;
         };

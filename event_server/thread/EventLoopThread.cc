@@ -14,10 +14,11 @@ using namespace muduo::net;
 
 EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
                                  const string& name)
-  : loop_(NULL),
+  : loop_(nullptr),
     exiting_(false),
     thread_([this] { threadFunc(); }, name),
     mutex_(),
+    mutex2_(),
     cond_(mutex_),
     callback_(cb)
 {
@@ -82,13 +83,13 @@ void EventLoopThread::threadFunc()
         cond_.notify();
     }
     std::cout << "threadFunc mutex after    : "<< thread_.name() << std::endl;
-
-    loop_->dispatch_loop(Event::Dispatcher::RunType::Block);
+    loop.dispatch_loop(Event::Dispatcher::RunType::Block);
 
     //assert(!exiting_);
     MutexLockGuard lock(mutex_);
     std::cout << "threadFunc loop_ = nullptr  : " << thread_.name() << std::endl;
     loop_ = nullptr;
     std::cout << "threadFunc end  : "<< thread_.name() << std::endl;
+
 }
 

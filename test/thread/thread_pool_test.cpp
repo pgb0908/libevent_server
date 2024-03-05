@@ -3,10 +3,30 @@
 #include <event2/event.h>
 #include "event_server/event/DispatcherImp.h"
 #include "event_server/thread/EventLoopThreadPool.h"
+#include "event_server/thread/WorkerImpl.h"
 #include <gtest/gtest.h>
 
 DEFINE_string(gtest_color, "", "");
 DEFINE_string(gtest_filter, "", "");
+
+
+/*TEST(worker, test01){
+    std::vector<std::unique_ptr<WorkerImpl>> workers;
+
+    for(int i=0; i < 2; i++){
+        std::string name  = "worker";
+        auto worker = std::make_unique<WorkerImpl>([](){
+            std::cout << "hello worker" << std::endl;
+        }, name+std::to_string(i));
+        workers.push_back(std::move(worker));
+    }
+
+    for(auto& worker : workers){
+        worker->start();
+    }
+
+}*/
+
 
 TEST(thread_pool, test01){
     auto dispatcher = Event::DispatcherImp();
@@ -20,12 +40,14 @@ TEST(thread_pool, test01){
     });
 
     for(auto loop : eventLoopThreadPool.getAllLoops()){
-       // std::cout << loop->getThreadId() <<  " ";
+       std::cout << loop->getThreadId() <<  " ";
     }std::cout << std::endl;
 
     //std::this_thread::sleep_for(std::chrono::seconds(2));
 
 }
+
+
 
 
 int main(int argc, char* argv[]){

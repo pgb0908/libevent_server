@@ -45,6 +45,7 @@ set(event_server_lib
         event_server/thread/EventLoopThreadPool.cc
         event_server/thread/ThreadPool.cc
         event_server/thread/Thread.cc
+        event_server/thread/WorkerImpl.cpp
 
 )
 
