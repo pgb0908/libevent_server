@@ -45,6 +45,7 @@ void EventLoopThreadPool::start(const ThreadInitCallback &cb) {
     if (numThreads_ == 0 && cb) {
         cb(baseLoop_);
     }
+    LOG(INFO) << "EventLoopThreadPool - start end";
 }
 
 Event::DispatcherImp *EventLoopThreadPool::getNextLoop() {

@@ -35,7 +35,7 @@ namespace muduo {
         private:
             void threadFunc();
 
-            Event::DispatcherImp* loop_;
+            Event::DispatcherImp* loop_ GUARDED_BY(mutex_);
             bool exiting_;
             Thread thread_;
             MutexLock mutex_;

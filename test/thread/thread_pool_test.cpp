@@ -12,17 +12,18 @@ TEST(thread_pool, test01){
     auto dispatcher = Event::DispatcherImp();
     std::string name = "loop";
     auto eventLoopThreadPool = muduo::net::EventLoopThreadPool(&dispatcher, name);
-    eventLoopThreadPool.setThreadNum(5);
+    eventLoopThreadPool.setThreadNum(1);
 
     eventLoopThreadPool.start([this](Event::DispatcherImp* dispatcherImp){
         std::cout << "hello" << std::endl;
         std::cout << dispatcherImp->getThreadId() << std::endl;
     });
 
-/*    for(auto loop : eventLoopThreadPool.getAllLoops()){
-        std::cout << loop->getThreadId() <<  " ";
-    }std::cout << std::endl;*/
+    for(auto loop : eventLoopThreadPool.getAllLoops()){
+       // std::cout << loop->getThreadId() <<  " ";
+    }std::cout << std::endl;
 
+    //std::this_thread::sleep_for(std::chrono::seconds(2));
 
 }
 
