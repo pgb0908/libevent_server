@@ -47,12 +47,15 @@ void EventLoopThread::threadFunc()
     ::prctl(PR_SET_NAME, loopThreadName_.c_str());
     thread_local static std::shared_ptr<Event::DispatcherImp> loop =
             std::make_shared<Event::DispatcherImp>();
-    //loop->queueInLoop([this]() { promiseForLoop_.set_value(1); });
     loop->post([this]() {
-        promiseForLoop_.set_value(1); });
+        promiseForLoop_.set_value(1);
+        LOG(INFO) <<"ready for loop";
+    });
+
     promiseForLoopPointer_.set_value(loop);
-    auto f = promiseForRun_.get_future();
+    auto f = promiseForRun_.get_future(); // promiseForRun_에 값이 셋팅 되길 기다림
     (void)f.get();
+    LOG(INFO) <<"worker before loop";
     loop->dispatch_loop(Event::Dispatcher::RunType::RunUntilExit);
     LOG(INFO) <<"worker exited dispatch loop";
     {
@@ -70,7 +73,7 @@ void EventLoopThread::run() {
     std::call_once(once_, [this]() {
         auto f = promiseForLoop_.get_future();
         promiseForRun_.set_value(1);
-        // Make sure the event loop loops before returning.
+        // dispatch_loop 이전에 run() 함수가 처리되는것을 보장하기 위해
         (void)f.get();
     });
 }

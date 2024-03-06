@@ -46,7 +46,9 @@ namespace Event {
     }
 
     void FileEventImpl::assignEvents(uint32_t events, event_base *base) {
-        assert(dispatcher_.isThreadSafe());
+        LOG(INFO) << "dispatcher_.getThreadId() : " << dispatcher_.getThreadId();
+        LOG(INFO) << "CurrentThread::tid() : " << muduo::CurrentThread::tid();
+        //assert(dispatcher_.isThreadSafe());
         assert(base != nullptr);
 
         enabled_events_ = events;

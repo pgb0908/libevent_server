@@ -22,12 +22,12 @@ using namespace muduo::net;
 
 TcpServer::TcpServer(Event::DispatcherImp *dispatcher,
                      const InetAddress &listenAddr,
-                     const string &nameArg,
+                     const string &nameArg, int threadNum,
                      Option option)
         : dispatcher_(dispatcher),
           ipPort_(listenAddr.toIpPort()),
           name_(nameArg),
-          threadPool_(new EventLoopThreadPool(3, name_)),
+          threadPool_(new EventLoopThreadPool(threadNum, name_)),
           acceptor_(new Acceptor(dispatcher, listenAddr, option == kReusePort)),
           threadInitCallback_([](Event::DispatcherImp* dispatcher){
               LOG(INFO) <<  "Thread init. " << "thread-id : " <<dispatcher->getThreadId();
@@ -37,6 +37,7 @@ TcpServer::TcpServer(Event::DispatcherImp *dispatcher,
           nextConnId_(1) {
     acceptor_->setNewConnectionCallback(
             std::bind(&TcpServer::newConnection, this, _1, _2));
+    threadPool_->start();
     LOG(INFO) << "TcpServer created. " << "thread-id : " <<dispatcher_->getThreadId();
 }
 
@@ -57,16 +58,18 @@ void TcpServer::setThreadNum(int numThreads) {
 }
 
 void TcpServer::start() {
+    LOG(INFO) << "TcpServer start. ";
+
     if (started_.getAndSet(1) == 0) {
        // threadPool_->start(threadInitCallback_);
         assert(!acceptor_->listening());
         acceptor_->listen();
 
-        dispatcher_->post([this](){
+/*        dispatcher_->post([this](){
             dispatcher_->printRegistEvent();
-        });
+        });*/
 
-        dispatcher_->dispatch_loop(Event::Dispatcher::RunType::Block);
+        dispatcher_->dispatch_loop(Event::Dispatcher::RunType::RunUntilExit);
     }
 }
 
@@ -82,8 +85,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
               << "] - new connection [" << connName
               << "] from " << peerAddr.toIpPort();
     InetAddress localAddr(sockets::getLocalAddr(sockfd));
-    // FIXME poll with zero timeout to double confirm the new connection
-    // FIXME use make_shared if necessary
+
     TcpConnectionPtr conn(new TcpConnection(dispatcher_,
                                             connName,
                                             sockfd,
@@ -103,12 +105,11 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
                 removeConnection(conn);
             }); // FIXME: unsafe
 
-    //ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
-
     // main-loop >> io-loop 에서 처리하도록 하는 명령함수가 필요함
-    ioLoop->post([&conn](){
+    ioLoop->post([conn](){
         conn->connectEstablished();
     });
+    //ioLoop->printRegistEvent();
 
     connections_[connName] = std::move(conn);
 

@@ -54,7 +54,6 @@ void Acceptor::listen() {
                                                  Event::FileTriggerType::Level,
                                                  Event::FileReadyType::Read);
 
-    event_base_dump_events(&dispatcher_->base(), stdout);
 }
 
 void Acceptor::handleRead() {

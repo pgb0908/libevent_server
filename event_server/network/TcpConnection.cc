@@ -233,10 +233,10 @@ void TcpConnection::setTcpNoDelay(bool on) {
 
 
 void TcpConnection::connectEstablished() {
-    // loop_->assertInLoopThread();
+    dispatcher_->assertInLoopThread();
     //connectionCallback_(shared_from_this())
-    assert(state_ == kConnecting);
-
+    //assert(state_ == kConnecting);
+    LOG(INFO) << "TCP connection Established";
     setState(kConnected);
     readEventPtr_ = dispatcher_->createFileEvent(socket_->fd(),
                                               [this](uint32_t events) {
@@ -283,8 +283,6 @@ void TcpConnection::handleRead(uint32_t events) {
                                                       Event::FileTriggerType::Level,
                                                       Event::FileReadyType::Write);
     }
-
-    event_base_dump_events(&dispatcher_->base(), stdout);
 }
 
 void TcpConnection::handleWrite(uint32_t events) {
@@ -319,8 +317,6 @@ void TcpConnection::handleWrite(uint32_t events) {
     } else {
         LOG(INFO)<< "Connection fd = " << socket_->fd() << " is down, no more writing";
     }
-
-    event_base_dump_events(&dispatcher_->base(), stdout);
 }
 
 void TcpConnection::handleClose() {
@@ -333,9 +329,8 @@ void TcpConnection::handleClose() {
     TcpConnectionPtr guardThis(shared_from_this());
     closeCallback_(guardThis);
 
-    size_t size = 1024;
-    char *buffer = (char *)malloc(size); // 예시로 1024 바이트 할당
-    event_base_dump_events(&dispatcher_->base(), stdout);
+    //size_t size = 1024;
+    //char *buffer = (char *)malloc(size); // 예시로 1024 바이트 할당
     // 파일 디스크립터 생성
 /*    FILE *memstream = open_memstream(&buffer, &size);
     event_base_dump_events(&dispatcher_->base(), memstream);

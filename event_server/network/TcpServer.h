@@ -40,7 +40,7 @@ namespace muduo {
             //TcpServer(EventLoop* loop, const InetAddress& listenAddr);
             TcpServer(Event::DispatcherImp *dispatcher,
                       const InetAddress &listenAddr,
-                      const string &nameArg,
+                      const string &nameArg, int threadNum,
                       Option option = kNoReusePort);
 
             ~TcpServer();  // force out-line dtor, for std::unique_ptr members.

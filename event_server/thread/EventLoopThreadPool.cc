@@ -46,6 +46,7 @@ void EventLoopThreadPool::wait() {
     {
         loopThreadVector_[i]->wait();
     }
+    started_ = false;
 }
 
 Event::DispatcherImp *EventLoopThreadPool::getNextLoop() {

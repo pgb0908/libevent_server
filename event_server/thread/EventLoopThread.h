@@ -57,8 +57,6 @@ namespace muduo {
 
         private:
             void threadFunc();
-
-            //Event::DispatcherImp* loop_ GUARDED_BY(mutex_);
             std::shared_ptr<Event::DispatcherImp> loop_;
             std::mutex loopMutex_;
             std::thread thread_;
@@ -67,13 +65,6 @@ namespace muduo {
             std::promise<int> promiseForRun_;
             std::promise<int> promiseForLoop_;
             std::once_flag once_;
-
-/*            bool exiting_;
-            MutexLock mutex_;
-            MutexLock mutex2_;
-            Condition cond_ GUARDED_BY(mutex_);*/
-
-
         };
 
     }  // namespace net
