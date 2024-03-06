@@ -1,6 +1,7 @@
 #include "real_time_system.h"
 
 #include <chrono>
+#include <memory>
 
 #include "timer_impl.h"
 
