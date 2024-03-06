@@ -70,7 +70,7 @@ namespace Event {
         bool do_post;
         {
             //Thread::LockGuard lock(post_lock_);
-            //muduo::MutexLockGuard guard(mutex_);
+            muduo::MutexLockGuard guard(mutex_);
             do_post = post_callbacks_.empty();
             post_callbacks_.push_back(std::move(callback));
         }
@@ -113,7 +113,7 @@ namespace Event {
             // callbacks execute. Callbacks added after this transfer will re-arm post_cb_ and will execute
             // later in the event loop.
             //Thread::LockGuard lock(post_lock_);
-           // muduo::MutexLockGuard guard(mutex_);
+           muduo::MutexLockGuard guard(mutex_);
             callbacks = std::move(post_callbacks_);
             // post_callbacks_ should be empty after the move.
             assert(post_callbacks_.empty());

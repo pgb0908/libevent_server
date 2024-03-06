@@ -8,88 +8,66 @@
 
 #include <iostream>
 #include "EventLoopThread.h"
+#include <sys/prctl.h>
 
 using namespace muduo;
 using namespace muduo::net;
 
-EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
-                                 const string& name)
+EventLoopThread::EventLoopThread(const string& name)
   : loop_(nullptr),
-    exiting_(false),
-    thread_([this] { threadFunc(); }, name),
-    mutex_(),
-    mutex2_(),
-    cond_(mutex_),
-    callback_(cb)
+    thread_([this]() { threadFunc(); }),
+    loopThreadName_(name)
 {
+    auto f = promiseForLoopPointer_.get_future();
+    loop_ = f.get();
 }
 
 EventLoopThread::~EventLoopThread()
 {
-  exiting_ = true;
-/*  if (loop_ != NULL) // not 100% race-free, eg. threadFunc could be running callback_.
-  {
-    // still a tiny chance to call destructed object, if threadFunc exits just now.
-    // but when EventLoopThread destructs, usually programming is exiting anyway.
-    //loop_->quit();
-    thread_.join();
-  }*/
-
-    thread_.join();
-}
-
-Event::DispatcherImp* EventLoopThread::startLoop()
-{
-    LOG(INFO) << "EventLoopThread,startLoop : " << thread_.name() <<std::endl;
-    assert(!thread_.started());
-    thread_.start(); // thread_local init
-
-    std::cout << "startLoop before mutex  : "<< thread_.name() << std::endl;
-
-    Event::DispatcherImp *loop = nullptr;
+    run();
+    std::shared_ptr<Event::DispatcherImp> loop;
     {
-
-        MutexLockGuard lock(mutex_);
-        std::cout << "startLoop in mutex  : "<< thread_.name() << std::endl;
-        while (loop_ == nullptr) {
-            std::cout << "startLoop loop_ != nullptr : " << thread_.name() << std::endl;
-            cond_.wait();
-        }
+        std::unique_lock<std::mutex> lk(loopMutex_);
         loop = loop_;
     }
-
-    std::cout << "startLoop after mutex  : "<< thread_.name() << std::endl;
-
-    return loop;
+    if (loop)
+    {
+        loop->exit();
+    }
+    if (thread_.joinable())
+    {
+        thread_.join();
+    }
 }
+
 
 void EventLoopThread::threadFunc()
 {
-    LOG(INFO) << "EventLoopThread - threadFunc" << "[" << thread_.name() << "]";
-    //loop_->dispatch_loop(Event::Dispatcher::RunType::Block);
-    std::cout << "threadFunc start    : "<< thread_.name() << std::endl;
-
-    Event::DispatcherImp loop;
-
-    if (callback_) {
-        callback_(&loop);
-    }
-
-    std::cout << "threadFunc mutex before    : "<< thread_.name() << std::endl;
+    ::prctl(PR_SET_NAME, loopThreadName_.c_str());
+    thread_local static std::shared_ptr<Event::DispatcherImp> loop =
+            std::make_shared<Event::DispatcherImp>();
+    //loop->queueInLoop([this]() { promiseForLoop_.set_value(1); });
+    loop->post([this]() { promiseForLoop_.set_value(1); });
+    promiseForLoopPointer_.set_value(loop);
+    auto f = promiseForRun_.get_future();
+    (void)f.get();
+    loop->dispatch_loop(Event::Dispatcher::RunType::RunUntilExit);
     {
-        MutexLockGuard lock(mutex_);
-        loop_ = &loop;
-        std::cout << "threadFunc cond-notify   : " << thread_.name() << std::endl;
-        cond_.notify();
+        std::unique_lock<std::mutex> lk(loopMutex_);
+        loop_ = nullptr;
     }
-    std::cout << "threadFunc mutex after    : "<< thread_.name() << std::endl;
-    loop.dispatch_loop(Event::Dispatcher::RunType::Block);
+}
 
-    //assert(!exiting_);
-    MutexLockGuard lock(mutex_);
-    std::cout << "threadFunc loop_ = nullptr  : " << thread_.name() << std::endl;
-    loop_ = nullptr;
-    std::cout << "threadFunc end  : "<< thread_.name() << std::endl;
+void EventLoopThread::wait() {
+    thread_.join();
+}
 
+void EventLoopThread::run() {
+    std::call_once(once_, [this]() {
+        auto f = promiseForLoop_.get_future();
+        promiseForRun_.set_value(1);
+        // Make sure the event loop loops before returning.
+        (void)f.get();
+    });
 }
 

@@ -24,13 +24,14 @@ namespace muduo {
     namespace net {
         class EventLoopThread;
 
-        class EventLoopThreadPool : noncopyable {
+        class EventLoopThreadPool {
         public:
             typedef std::function<void(Event::DispatcherImp *)> ThreadInitCallback;
 
-            EventLoopThreadPool(Event::DispatcherImp *baseLoop, string nameArg);
+            EventLoopThreadPool(size_t threadNum, string nameArg);
             ~EventLoopThreadPool();
 
+/*
             void setThreadNum(int numThreads) { numThreads_ = numThreads; }
             void start(const ThreadInitCallback &cb = ThreadInitCallback());
 
@@ -44,15 +45,61 @@ namespace muduo {
             std::vector<Event::DispatcherImp *> getAllLoops();
             bool started() const { return started_; }
             const string &name() const { return name_; }
+*/
+
+
+            /**
+              * @brief Run all event loops in the pool.
+              * @note This function doesn't block the current thread.
+              */
+            void start();
+
+            /**
+             * @brief Wait for all event loops in the pool to quit.
+             *
+             * @note This function blocks the current thread.
+             */
+            void wait();
+
+            /**
+             * @brief Return the number of the event loop.
+             *
+             * @return size_t
+             */
+            size_t size()
+            {
+                return loopThreadVector_.size();
+            }
+
+            /**
+             * @brief Get the next event loop in the pool.
+             *
+             * @return EventLoop*
+             */
+            Event::DispatcherImp *getNextLoop();
+
+            /**
+             * @brief Get the event loop in the `id` position in the pool.
+             *
+             * @param id The id of the first event loop is zero. If the id >= the number
+             * of event loops, nullptr is returned.
+             * @return EventLoop*
+             */
+            Event::DispatcherImp *getLoop(size_t id);
+
+            /**
+             * @brief Get all event loops in the pool.
+             *
+             * @return std::vector<EventLoop *>
+             */
+            std::vector<Event::DispatcherImp *> getLoops() const;
 
         private:
-            Event::DispatcherImp *baseLoop_;
+            std::vector<std::shared_ptr<EventLoopThread>> loopThreadVector_;
+            std::atomic<size_t> loopIndex_{0};
+            //Event::DispatcherImp *baseLoop_;
             string name_;
             bool started_;
-            int numThreads_;
-            int next_;
-            std::vector<std::unique_ptr<EventLoopThread>> threads_;
-            std::vector<Event::DispatcherImp *> loops_;
         };
 
     }  // namespace net

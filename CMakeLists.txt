@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 3.26)
 project(libevent_server)
 
-set(CMAKE_CXX_STANDARD 17)
-
 find_package(Libevent REQUIRED)
 find_package(absl REQUIRED)
 find_package(glog REQUIRED)
 find_package(GTest REQUIRED)
+find_package(Threads)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
 add_executable(libevent_server main.cpp)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
 set(event_server_lib
         event_server/common/Condition.cc
@@ -49,11 +52,13 @@ set(event_server_lib
 
 )
 
+
 add_library(event ${event_server_lib})
 target_link_libraries(event
         libevent::pthreads
         libevent::core
         glog::glog
+        Threads::Threads
 )
 
 target_link_libraries(libevent_server

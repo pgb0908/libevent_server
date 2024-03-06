@@ -27,7 +27,7 @@ TcpServer::TcpServer(Event::DispatcherImp *dispatcher,
         : dispatcher_(dispatcher),
           ipPort_(listenAddr.toIpPort()),
           name_(nameArg),
-          threadPool_(new EventLoopThreadPool(dispatcher, name_)),
+          threadPool_(new EventLoopThreadPool(3, name_)),
           acceptor_(new Acceptor(dispatcher, listenAddr, option == kReusePort)),
           threadInitCallback_([](Event::DispatcherImp* dispatcher){
               LOG(INFO) <<  "Thread init. " << "thread-id : " <<dispatcher->getThreadId();
@@ -53,12 +53,12 @@ TcpServer::~TcpServer() {
 
 void TcpServer::setThreadNum(int numThreads) {
     assert(0 <= numThreads);
-    threadPool_->setThreadNum(numThreads);
+    //threadPool_->setThreadNum(numThreads);
 }
 
 void TcpServer::start() {
     if (started_.getAndSet(1) == 0) {
-        threadPool_->start(threadInitCallback_);
+       // threadPool_->start(threadInitCallback_);
         assert(!acceptor_->listening());
         acceptor_->listen();
 

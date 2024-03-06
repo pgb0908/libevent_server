@@ -16,72 +16,58 @@
 using namespace muduo;
 using namespace muduo::net;
 
-EventLoopThreadPool::EventLoopThreadPool(Event::DispatcherImp *baseLoop, string nameArg)
-        : baseLoop_(baseLoop),
+EventLoopThreadPool::EventLoopThreadPool(size_t threadNum, string nameArg)
+        :
           name_(std::move(nameArg)),
-          started_(false),
-          numThreads_(0),
-          next_(0) {
+          started_(false),loopIndex_(0){
+
+    for (size_t i = 0; i < threadNum; ++i)
+    {
+        std::string thread_name = name_ + "_" + std::to_string(i);
+        loopThreadVector_.emplace_back(std::make_shared<EventLoopThread>(thread_name));
+    }
 }
 
 EventLoopThreadPool::~EventLoopThreadPool() {
     // Don't delete loop, it's stack variable
 }
 
-void EventLoopThreadPool::start(const ThreadInitCallback &cb) {
-    LOG(INFO) << "EventLoopThreadPool - start";
-    assert(!started_);
-    baseLoop_->assertInLoopThread();
-
-    started_ = true;
-
-    LOG(INFO) << "EventLoopThreadPool - number of IO thread[" << numThreads_ << "]";
-
-    for (int i = 0; i < numThreads_; ++i) {
-        char buf[name_.size() + 32];
-        snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
-        auto *t = new EventLoopThread(cb, buf);
-        threads_.push_back(std::unique_ptr<EventLoopThread>(t));
-        loops_.push_back(t->startLoop());
+void EventLoopThreadPool::start() {
+    for (unsigned int i = 0; i < loopThreadVector_.size(); ++i)
+    {
+        loopThreadVector_[i]->run();
     }
-    if (numThreads_ == 0 && cb) {
-        cb(baseLoop_);
+}
+
+void EventLoopThreadPool::wait() {
+    for (unsigned int i = 0; i < loopThreadVector_.size(); ++i)
+    {
+        loopThreadVector_[i]->wait();
     }
-    LOG(INFO) << "EventLoopThreadPool - start end";
 }
 
 Event::DispatcherImp *EventLoopThreadPool::getNextLoop() {
-    baseLoop_->assertInLoopThread();
-    assert(started_);
-    Event::DispatcherImp *loop = baseLoop_;
-
-    if (!loops_.empty()) {
-        // round-robin
-        loop = loops_[next_];
-        ++next_;
-        if (implicit_cast<size_t>(next_) >= loops_.size()) {
-            next_ = 0;
-        }
+    if (loopThreadVector_.size() > 0)
+    {
+        size_t index = loopIndex_.fetch_add(1, std::memory_order_relaxed);
+        Event::DispatcherImp *loop =
+                loopThreadVector_[index % loopThreadVector_.size()]->getLoop();
+        return loop;
     }
-    return loop;
+    return nullptr;
 }
 
-Event::DispatcherImp *EventLoopThreadPool::getLoopForHash(size_t hashCode) {
-    baseLoop_->assertInLoopThread();
-    Event::DispatcherImp *loop = baseLoop_;
-
-    if (!loops_.empty()) {
-        loop = loops_[hashCode % loops_.size()];
-    }
-    return loop;
+Event::DispatcherImp *EventLoopThreadPool::getLoop(size_t id) {
+    if (id < loopThreadVector_.size())
+        return loopThreadVector_[id]->getLoop();
+    return nullptr;
 }
 
-std::vector<Event::DispatcherImp *> EventLoopThreadPool::getAllLoops() {
-    baseLoop_->assertInLoopThread();
-    assert(started_);
-    if (loops_.empty()) {
-        return std::vector<Event::DispatcherImp *>(1, baseLoop_);
-    } else {
-        return loops_;
+std::vector<Event::DispatcherImp *> EventLoopThreadPool::getLoops() const {
+    std::vector<Event::DispatcherImp *> ret;
+    for (auto &loopThread : loopThreadVector_)
+    {
+        ret.push_back(loopThread->getLoop());
     }
+    return ret;
 }

@@ -29,21 +29,18 @@ DEFINE_string(gtest_filter, "", "");
 
 
 TEST(thread_pool, test01){
-    auto dispatcher = Event::DispatcherImp();
-    std::string name = "loop";
-    auto eventLoopThreadPool = muduo::net::EventLoopThreadPool(&dispatcher, name);
-    eventLoopThreadPool.setThreadNum(1);
+    std::string name = "thread_pool_test";
+    auto eventLoopThreadPool = new muduo::net::EventLoopThreadPool(5, name);
+    eventLoopThreadPool->start();
 
-    eventLoopThreadPool.start([this](Event::DispatcherImp* dispatcherImp){
-        std::cout << "hello" << std::endl;
-        std::cout << dispatcherImp->getThreadId() << std::endl;
-    });
+    auto loops = eventLoopThreadPool->getLoops();
+    std::cout << loops.size() << std::endl;
 
-    for(auto loop : eventLoopThreadPool.getAllLoops()){
+    for(auto loop : eventLoopThreadPool->getLoops()){
        std::cout << loop->getThreadId() <<  " ";
     }std::cout << std::endl;
 
-    //std::this_thread::sleep_for(std::chrono::seconds(2));
+
 
 }
 

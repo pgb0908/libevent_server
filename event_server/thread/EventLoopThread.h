@@ -11,6 +11,8 @@
 #ifndef MUDUO_NET_EVENTLOOPTHREAD_H
 #define MUDUO_NET_EVENTLOOPTHREAD_H
 
+#include <mutex>
+#include <future>
 #include "event_server/common/Mutex.h"
 #include "event_server/common/Condition.h"
 #include "event_server/common/CountDownLatch.h"
@@ -25,23 +27,53 @@ namespace muduo {
         public:
             typedef std::function<void(Event::DispatcherImp *)> ThreadInitCallback;
 
-            EventLoopThread(const ThreadInitCallback &cb = ThreadInitCallback(),
-                            const string &name = string());
+            EventLoopThread(const string &name = string());
 
             ~EventLoopThread();
 
-            Event::DispatcherImp *startLoop();
+            //Event::DispatcherImp *startLoop();
+
+            /**
+             * @brief Wait for the event loop to exit.
+             * @note This method blocks the current thread until the event loop exits.
+             */
+            void wait();
+
+            /**
+             * @brief Get the pointer of the event loop of the thread.
+             *
+             * @return EventLoop*
+             */
+            Event::DispatcherImp *getLoop() const {
+                return loop_.get();
+            }
+
+            /**
+             * @brief Run the event loop of the thread. This method doesn't block the
+             * current thread.
+             *
+             */
+            void run();
 
         private:
             void threadFunc();
 
-            Event::DispatcherImp* loop_ GUARDED_BY(mutex_);
-            bool exiting_;
-            Thread thread_;
+            //Event::DispatcherImp* loop_ GUARDED_BY(mutex_);
+            std::shared_ptr<Event::DispatcherImp> loop_;
+            std::mutex loopMutex_;
+            std::thread thread_;
+            std::string loopThreadName_;
+            std::promise<std::shared_ptr<Event::DispatcherImp>> promiseForLoopPointer_;
+            std::promise<int> promiseForRun_;
+            std::promise<int> promiseForLoop_;
+            std::once_flag once_;
+
+/*            bool exiting_;
             MutexLock mutex_;
             MutexLock mutex2_;
-            Condition cond_ GUARDED_BY(mutex_);
-            ThreadInitCallback callback_;
+            Condition cond_ GUARDED_BY(mutex_);*/
+
+
         };
 
     }  // namespace net

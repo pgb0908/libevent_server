@@ -70,7 +70,7 @@ namespace Event {
         LibeventScheduler base_scheduler_;
         const pid_t threadId_;
         std::list<PostCb> post_callbacks_;
-        //muduo::MutexLock mutex_;
+        muduo::MutexLock mutex_;
         SchedulableCallbackPtr post_cb_;
         MonotonicTime approximate_monotonic_time_;
         Event::RealTimeSystem time_source_;
