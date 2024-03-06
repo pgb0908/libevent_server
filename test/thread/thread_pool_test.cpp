@@ -30,7 +30,7 @@ DEFINE_string(gtest_filter, "", "");
 
 TEST(thread_pool, test01){
     std::string name = "thread_pool_test";
-    auto eventLoopThreadPool = new muduo::net::EventLoopThreadPool(5, name);
+    auto eventLoopThreadPool = new muduo::net::EventLoopThreadPool(3, name);
     eventLoopThreadPool->start();
 
     auto loops = eventLoopThreadPool->getLoops();
@@ -40,8 +40,16 @@ TEST(thread_pool, test01){
        std::cout << loop->getThreadId() <<  " ";
     }std::cout << std::endl;
 
+    auto next_loop = eventLoopThreadPool->getNextLoop();
+    auto next_loop2 = eventLoopThreadPool->getNextLoop();
+    auto next_loop3 = eventLoopThreadPool->getNextLoop();
+    auto next_loop4 = eventLoopThreadPool->getNextLoop();
+    auto next_loop5 = eventLoopThreadPool->getNextLoop();
+    auto next_loop6 = eventLoopThreadPool->getNextLoop();
 
 
+
+    //eventLoopThreadPool->wait();
 }
 
 

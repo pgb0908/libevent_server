@@ -43,17 +43,21 @@ EventLoopThread::~EventLoopThread()
 
 void EventLoopThread::threadFunc()
 {
+    LOG(INFO) <<"worker entering dispatch loop";
     ::prctl(PR_SET_NAME, loopThreadName_.c_str());
     thread_local static std::shared_ptr<Event::DispatcherImp> loop =
             std::make_shared<Event::DispatcherImp>();
     //loop->queueInLoop([this]() { promiseForLoop_.set_value(1); });
-    loop->post([this]() { promiseForLoop_.set_value(1); });
+    loop->post([this]() {
+        promiseForLoop_.set_value(1); });
     promiseForLoopPointer_.set_value(loop);
     auto f = promiseForRun_.get_future();
     (void)f.get();
     loop->dispatch_loop(Event::Dispatcher::RunType::RunUntilExit);
+    LOG(INFO) <<"worker exited dispatch loop";
     {
         std::unique_lock<std::mutex> lk(loopMutex_);
+        //loop_->shutdown();
         loop_ = nullptr;
     }
 }

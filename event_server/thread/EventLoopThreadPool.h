@@ -29,24 +29,8 @@ namespace muduo {
             typedef std::function<void(Event::DispatcherImp *)> ThreadInitCallback;
 
             EventLoopThreadPool(size_t threadNum, string nameArg);
+
             ~EventLoopThreadPool();
-
-/*
-            void setThreadNum(int numThreads) { numThreads_ = numThreads; }
-            void start(const ThreadInitCallback &cb = ThreadInitCallback());
-
-            // valid after calling start()
-            /// round-robin
-            Event::DispatcherImp *getNextLoop();
-
-            /// with the same hash code, it will always return the same EventLoop
-            Event::DispatcherImp *getLoopForHash(size_t hashCode);
-
-            std::vector<Event::DispatcherImp *> getAllLoops();
-            bool started() const { return started_; }
-            const string &name() const { return name_; }
-*/
-
 
             /**
               * @brief Run all event loops in the pool.
@@ -66,8 +50,7 @@ namespace muduo {
              *
              * @return size_t
              */
-            size_t size()
-            {
+            size_t size() {
                 return loopThreadVector_.size();
             }
 
@@ -97,7 +80,6 @@ namespace muduo {
         private:
             std::vector<std::shared_ptr<EventLoopThread>> loopThreadVector_;
             std::atomic<size_t> loopIndex_{0};
-            //Event::DispatcherImp *baseLoop_;
             string name_;
             bool started_;
         };

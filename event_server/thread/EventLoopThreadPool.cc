@@ -29,14 +29,16 @@ EventLoopThreadPool::EventLoopThreadPool(size_t threadNum, string nameArg)
 }
 
 EventLoopThreadPool::~EventLoopThreadPool() {
-    // Don't delete loop, it's stack variable
 }
 
 void EventLoopThreadPool::start() {
+    assert(!started_);
+
     for (unsigned int i = 0; i < loopThreadVector_.size(); ++i)
     {
         loopThreadVector_[i]->run();
     }
+    started_ = true;
 }
 
 void EventLoopThreadPool::wait() {
