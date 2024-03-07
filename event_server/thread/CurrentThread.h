@@ -7,6 +7,8 @@
 #define MUDUO_BASE_CURRENTTHREAD_H
 
 #include "event_server/common/Types.h"
+#include <unistd.h>
+#include <sys/syscall.h>
 
 namespace muduo
 {
@@ -21,11 +23,12 @@ namespace CurrentThread
 
   inline int tid()
   {
-    if (__builtin_expect(t_cachedTid == 0, 0))
+/*    if (__builtin_expect(t_cachedTid == 0, 0))
     {
       cacheTid();
-    }
-    return t_cachedTid;
+    }*/
+    //return t_cachedTid;
+      return static_cast<int64_t>(syscall(SYS_gettid));
   }
 
   inline const char* tidString() // for logging

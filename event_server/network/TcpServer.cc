@@ -86,7 +86,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
               << "] from " << peerAddr.toIpPort();
     InetAddress localAddr(sockets::getLocalAddr(sockfd));
 
-    TcpConnectionPtr conn(new TcpConnection(dispatcher_,
+    TcpConnectionPtr conn(new TcpConnection(ioLoop,
                                             connName,
                                             sockfd,
                                             localAddr,
@@ -109,7 +109,6 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
     ioLoop->post([conn](){
         conn->connectEstablished();
     });
-    //ioLoop->printRegistEvent();
 
     connections_[connName] = std::move(conn);
 
@@ -132,8 +131,9 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
 
 void TcpServer::doMessageDefault(const TcpConnectionPtr &conn, muduo::net::Buffer *buf) {
     //size_t len = buf->readableBytes();
-    conn->outputBuffer()->append(buf->peek(), buf->readableBytes());
-    //conn->send(buf);
+    LOG(INFO) << "doMessageDefault";
+    //conn->outputBuffer()->append(buf->peek(), buf->readableBytes());
+    conn->send(buf);
 }
 
 void TcpServer::doWriteCompleteDefault(const TcpConnectionPtr &conn) {

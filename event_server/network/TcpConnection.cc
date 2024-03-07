@@ -98,6 +98,7 @@ void TcpConnection::send(const StringPiece &message) {
 
 // FIXME efficiency!!!
 void TcpConnection::send(Buffer *buf) {
+    LOG(INFO) << "sending message";
     assert(state_ == kConnected);
     ssize_t nwrote = 0;
     auto data = buf->peek();
@@ -233,11 +234,14 @@ void TcpConnection::setTcpNoDelay(bool on) {
 
 
 void TcpConnection::connectEstablished() {
-    dispatcher_->assertInLoopThread();
+    //dispatcher_->assertInLoopThread();
     //connectionCallback_(shared_from_this())
     //assert(state_ == kConnecting);
-    LOG(INFO) << "TCP connection Established";
+
+    assert(dispatcher_->isThreadSafe());
     setState(kConnected);
+
+    // 여기서 io의 dispatcher를 가져와야함
     readEventPtr_ = dispatcher_->createFileEvent(socket_->fd(),
                                               [this](uint32_t events) {
                                                   handleRead(events);
@@ -258,6 +262,7 @@ void TcpConnection::connectDestroyed() {
 
 void TcpConnection::handleRead(uint32_t events) {
     //loop_->assertInLoopThread();
+    assert(getLoop()->isThreadSafe());
 
     int savedErrno = 0;
     ssize_t n = inputBuffer_.readFd(socket_->fd(), &savedErrno);
@@ -273,15 +278,6 @@ void TcpConnection::handleRead(uint32_t events) {
         LOG(ERROR) << "TcpConnection::handleRead";
         handleError();
         return;
-    }
-
-    if(outputBuffer_.readableBytes() > 0){
-        writeEventPtr_ = dispatcher_->createFileEvent(socket_->fd(),
-                                                      [this](uint32_t events) {
-                                                          handleWrite(events);
-                                                      },
-                                                      Event::FileTriggerType::Level,
-                                                      Event::FileReadyType::Write);
     }
 }
 
