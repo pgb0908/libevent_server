@@ -60,7 +60,7 @@ void EventLoopThread::threadFunc()
     LOG(INFO) <<"worker exited dispatch loop";
     {
         std::unique_lock<std::mutex> lk(loopMutex_);
-        //loop_->shutdown();
+        loop_->exit();
         loop_ = nullptr;
     }
 }
