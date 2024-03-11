@@ -38,7 +38,8 @@ TcpServer::TcpServer(Event::DispatcherImp *dispatcher,
     acceptor_->setNewConnectionCallback(
             std::bind(&TcpServer::newConnection, this, _1, _2));
     threadPool_->start();
-    LOG(INFO) << "TcpServer created. " << "thread-id : " <<dispatcher_->getThreadId();
+    LOG(INFO) << "TcpServer created. " << "thread-id : " <<dispatcher_->getThreadId()
+        << " thread name : " << muduo::CurrentThread::name();
 }
 
 TcpServer::~TcpServer() {

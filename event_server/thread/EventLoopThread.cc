@@ -45,6 +45,7 @@ void EventLoopThread::threadFunc()
 {
     LOG(INFO) <<"worker entering dispatch loop";
     ::prctl(PR_SET_NAME, loopThreadName_.c_str());
+    LOG(INFO) <<"worker entering dispatch loop : " << muduo::CurrentThread::name();
     thread_local static std::shared_ptr<Event::DispatcherImp> loop =
             std::make_shared<Event::DispatcherImp>();
     loop->post([this]() {
