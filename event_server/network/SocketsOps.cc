@@ -18,6 +18,7 @@
 #include <sys/uio.h>  // readv
 #include <unistd.h>
 #include <iostream>
+#include <cassert>
 
 using namespace muduo;
 using namespace muduo::net;
