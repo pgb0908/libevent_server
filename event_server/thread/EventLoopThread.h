@@ -16,7 +16,7 @@
 #include "event_server/common/Mutex.h"
 #include "event_server/common/Condition.h"
 #include "event_server/common/CountDownLatch.h"
-#include "event_server/event/DispatcherImp.h"
+#include "event_server/event/Dispatcher.h"
 
 #include "Thread.h"
 
@@ -25,7 +25,7 @@ namespace muduo {
 
         class EventLoopThread : noncopyable {
         public:
-            typedef std::function<void(Event::DispatcherImp *)> ThreadInitCallback;
+            typedef std::function<void(Event::Dispatcher *)> ThreadInitCallback;
 
             EventLoopThread(const string &name = string());
 
@@ -44,7 +44,7 @@ namespace muduo {
              *
              * @return EventLoop*
              */
-            Event::DispatcherImp *getLoop() const {
+            Event::Dispatcher *getLoop() const {
                 return loop_.get();
             }
 
@@ -57,11 +57,11 @@ namespace muduo {
 
         private:
             void threadFunc();
-            std::shared_ptr<Event::DispatcherImp> loop_;
+            std::shared_ptr<Event::Dispatcher> loop_;
             std::mutex loopMutex_;
             std::thread thread_;
             std::string loopThreadName_;
-            std::promise<std::shared_ptr<Event::DispatcherImp>> promiseForLoopPointer_;
+            std::promise<std::shared_ptr<Event::Dispatcher>> promiseForLoopPointer_;
             std::promise<int> promiseForRun_;
             std::promise<int> promiseForLoop_;
             std::once_flag once_;

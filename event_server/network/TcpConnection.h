@@ -17,7 +17,7 @@
 #include "Callbacks.h"
 #include "Buffer.h"
 #include "InetAddress.h"
-#include "event_server/event/DispatcherImp.h"
+#include "event_server/event/Dispatcher.h"
 
 #include <memory>
 
@@ -41,7 +41,7 @@ namespace muduo {
             /// Constructs a TcpConnection with a connected sockfd
             ///
             /// User should not create this object.
-            TcpConnection(Event::DispatcherImp *dispatcher,
+            TcpConnection(Event::Dispatcher *dispatcher,
                           const string &name,
                           int sockfd,
                           const InetAddress &localAddr,
@@ -49,7 +49,7 @@ namespace muduo {
 
             ~TcpConnection();
 
-            Event::DispatcherImp *getLoop() const { return dispatcher_; }
+            Event::Dispatcher *getLoop() const { return dispatcher_; }
             const string &name() const { return name_; }
             const InetAddress &localAddress() const { return localAddr_; }
             const InetAddress &peerAddress() const { return peerAddr_; }
@@ -108,7 +108,7 @@ namespace muduo {
             void setState(StateE s) { state_ = s; }
             const char *stateToString() const;
 
-            Event::DispatcherImp *dispatcher_;
+            Event::Dispatcher *dispatcher_;
             const string name_;
             StateE state_;  // FIXME: use atomic variable
             bool reading_;

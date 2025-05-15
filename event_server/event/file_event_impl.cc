@@ -5,7 +5,7 @@
 
 namespace Event {
 
-    FileEventImpl::FileEventImpl(DispatcherImp &dispatcher, int fd, FileReadyCb cb,
+    FileEventImpl::FileEventImpl(Dispatcher &dispatcher, int fd, FileReadyCb cb,
                                  FileTriggerType trigger, uint32_t events)
             : dispatcher_(dispatcher), cb_(cb), fd_(fd), trigger_(trigger), enabled_events_(events),
               activation_cb_(dispatcher.createSchedulableCallback([this]() {

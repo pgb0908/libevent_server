@@ -13,7 +13,7 @@
 
 #include "event_server/common/noncopyable.h"
 #include "InetAddress.h"
-#include "event_server/event/DispatcherImp.h"
+#include "event_server/event/Dispatcher.h"
 
 #include <functional>
 #include <memory>
@@ -25,7 +25,7 @@ namespace muduo {
         public:
             typedef std::function<void(int sockfd)> NewConnectionCallback;
 
-            Connector(Event::DispatcherImp *dispatcher, const InetAddress &serverAddr);
+            Connector(Event::Dispatcher *dispatcher, const InetAddress &serverAddr);
 
             ~Connector();
 
@@ -55,7 +55,7 @@ namespace muduo {
             int removeAndResetChannel();
             void resetChannel();
 
-            Event::DispatcherImp *dispatcher_;
+            Event::Dispatcher *dispatcher_;
             InetAddress serverAddr_;
             bool connect_; // atomic
             States state_;  // FIXME: use atomic variable

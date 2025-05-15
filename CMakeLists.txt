@@ -23,7 +23,7 @@ set(event_server_lib
         event_server/common/Timestamp.cc
         event_server/common/TimeZone.cc
 
-        event_server/event/DispatcherImp.cpp
+        event_server/event/Dispatcher.cpp
         event_server/event/event_impl_base.cc
         event_server/event/file_event_impl.cc
         event_server/event/libevent.cc

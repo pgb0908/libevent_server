@@ -21,7 +21,7 @@
 using namespace muduo;
 using namespace muduo::net;
 
-Acceptor::Acceptor(Event::DispatcherImp *dispatcher, const InetAddress &listenAddr, bool reuseport)
+Acceptor::Acceptor(Event::Dispatcher *dispatcher, const InetAddress &listenAddr, bool reuseport)
         : dispatcher_(dispatcher),
           acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
           listening_(false),

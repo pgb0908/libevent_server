@@ -25,7 +25,7 @@ EventLoopThread::EventLoopThread(const string& name)
 EventLoopThread::~EventLoopThread()
 {
     run();
-    std::shared_ptr<Event::DispatcherImp> loop;
+    std::shared_ptr<Event::Dispatcher> loop;
     {
         std::unique_lock<std::mutex> lk(loopMutex_);
         loop = loop_;
@@ -46,8 +46,8 @@ void EventLoopThread::threadFunc()
     LOG(INFO) <<"worker entering dispatch loop";
     ::prctl(PR_SET_NAME, loopThreadName_.c_str());
     LOG(INFO) <<"worker entering dispatch loop : " << muduo::CurrentThread::name();
-    thread_local static std::shared_ptr<Event::DispatcherImp> loop =
-            std::make_shared<Event::DispatcherImp>();
+    thread_local static std::shared_ptr<Event::Dispatcher> loop =
+            std::make_shared<Event::Dispatcher>();
     loop->post([this]() {
         promiseForLoop_.set_value(1);
         LOG(INFO) <<"ready for loop";
@@ -57,7 +57,7 @@ void EventLoopThread::threadFunc()
     auto f = promiseForRun_.get_future(); // promiseForRun_에 값이 셋팅 되길 기다림
     (void)f.get();
     LOG(INFO) <<"worker before loop";
-    loop->dispatch_loop(Event::RunType::RunUntilExit);
+    loop->run(Event::RunType::RunUntilExit);
     LOG(INFO) <<"worker exited dispatch loop";
     {
         std::unique_lock<std::mutex> lk(loopMutex_);

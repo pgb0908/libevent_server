@@ -52,7 +52,7 @@ public:
  */
 class TimerImpl : public Timer, ImplBase {
 public:
-  TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Event::DispatcherImp& dispatcher);
+  TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Event::Dispatcher& dispatcher);
 
   // Timer
   void disableTimer() override;
@@ -63,7 +63,7 @@ public:
 private:
   void internalEnableTimer(const timeval& tv);
   TimerCb cb_;
-  DispatcherImp& dispatcher_;
+  Dispatcher& dispatcher_;
 
 };
 

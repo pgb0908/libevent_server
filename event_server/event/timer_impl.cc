@@ -2,11 +2,11 @@
 #include <chrono>
 #include "event2/event.h"
 #include "cassert"
-#include "DispatcherImp.h"
+#include "Dispatcher.h"
 
 namespace Event {
 
-TimerImpl::TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, DispatcherImp& dispatcher)
+TimerImpl::TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Dispatcher& dispatcher)
     : cb_(cb), dispatcher_(dispatcher) {
   assert(cb_);
   evtimer_assign(

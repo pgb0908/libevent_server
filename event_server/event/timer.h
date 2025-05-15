@@ -9,7 +9,7 @@
 
 namespace Event {
 
-    class DispatcherImp;
+    class Dispatcher;
 
     /**
      * Callback invoked when a timer event fires.
@@ -44,7 +44,7 @@ namespace Event {
         /**
          * Creates a timer.
          */
-        virtual TimerPtr createTimer(const TimerCb &cb, DispatcherImp &dispatcher) = 0;
+        virtual TimerPtr createTimer(const TimerCb &cb, Dispatcher &dispatcher) = 0;
     };
 
     using SchedulerPtr = std::unique_ptr<Scheduler>;

@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <event2/event.h>
-#include "event_server/event/DispatcherImp.h"
+#include "event_server/event/Dispatcher.h"
 #include <gtest/gtest.h>
 
 DEFINE_string(gtest_color, "", "");
@@ -14,7 +14,7 @@ DEFINE_string(gtest_filter, "", "");
 TEST(dispatcher_test, dispatcher_test_schedulableCallback01){
     int rtn = 0;
 
-    auto dispatcher = new Event::DispatcherImp();
+    auto dispatcher = new Event::Dispatcher();
     auto testCallback = dispatcher->createSchedulableCallback(
             [&rtn]() {
                 std::cout << "hello" << std::endl;
@@ -33,7 +33,7 @@ TEST(dispatcher_test, dispatcher_test_schedulableCallback01){
     );*/
 
     event_base_dump_events(&dispatcher->base(), stdout);
-    dispatcher->dispatch_loop(Event::Dispatcher::RunType::Block);
+    dispatcher->run(Event::RunType::Block);
     dispatcher->exit();
 
     EXPECT_EQ(rtn, 1);

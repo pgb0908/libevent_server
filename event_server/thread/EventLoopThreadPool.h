@@ -13,7 +13,7 @@
 
 #include "event_server/common/Types.h"
 #include "event_server/common/noncopyable.h"
-#include "event_server/event/DispatcherImp.h"
+#include "event_server/event/Dispatcher.h"
 
 #include <functional>
 #include <memory>
@@ -26,7 +26,7 @@ namespace muduo {
 
         class EventLoopThreadPool {
         public:
-            typedef std::function<void(Event::DispatcherImp *)> ThreadInitCallback;
+            typedef std::function<void(Event::Dispatcher *)> ThreadInitCallback;
 
             EventLoopThreadPool(size_t threadNum, string nameArg);
 
@@ -59,7 +59,7 @@ namespace muduo {
              *
              * @return EventLoop*
              */
-            Event::DispatcherImp *getNextLoop();
+            Event::Dispatcher *getNextLoop();
 
             /**
              * @brief Get the event loop in the `id` position in the pool.
@@ -68,14 +68,14 @@ namespace muduo {
              * of event loops, nullptr is returned.
              * @return EventLoop*
              */
-            Event::DispatcherImp *getLoop(size_t id);
+            Event::Dispatcher *getLoop(size_t id);
 
             /**
              * @brief Get all event loops in the pool.
              *
              * @return std::vector<EventLoop *>
              */
-            std::vector<Event::DispatcherImp *> getLoops() const;
+            std::vector<Event::Dispatcher *> getLoops() const;
 
         private:
             std::vector<std::shared_ptr<EventLoopThread>> loopThreadVector_;

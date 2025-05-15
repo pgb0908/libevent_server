@@ -5,7 +5,7 @@
 
 #include "event2/util.h"
 #include "cassert"
-#include "DispatcherImp.h"
+#include "Dispatcher.h"
 
 namespace Event {
 
@@ -25,7 +25,7 @@ LibeventScheduler::LibeventScheduler() {
   assert(Libevent::Global::initialized());
 }
 
-TimerPtr LibeventScheduler::createTimer(const TimerCb& cb, DispatcherImp& dispatcher) {
+TimerPtr LibeventScheduler::createTimer(const TimerCb& cb, Dispatcher& dispatcher) {
   return std::make_unique<TimerImpl>(libevent_, cb, dispatcher);
 };
 

@@ -7,7 +7,7 @@
 #include <utility>
 
 WorkerImpl::WorkerImpl(const std::function<void()>& cb, std::string name)
-        : dispatcherPtr_(std::make_unique<Event::DispatcherImp>()), cb_(cb), name_(std::move(name)) {
+        : dispatcherPtr_(std::make_unique<Event::Dispatcher>()), cb_(cb), name_(std::move(name)) {
 
 }
 
@@ -20,7 +20,7 @@ void WorkerImpl::threadRoutine(const std::function<void()> &cb) {
     dispatcherPtr_->post([this, cb]() {
         cb();
     });
-    dispatcherPtr_->dispatch_loop(Event::RunType::Block);
+    dispatcherPtr_->run(Event::RunType::Block);
     LOG(INFO) <<"worker exited dispatch loop";
 
     //dispatcher_->shutdown();

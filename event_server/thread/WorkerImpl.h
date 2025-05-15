@@ -6,11 +6,11 @@
 #define LIBEVENT_SERVER_WORKERIMPL_H
 
 
-#include "event_server/event/DispatcherImp.h"
+#include "event_server/event/Dispatcher.h"
 #include "Thread.h"
 
 class WorkerImpl {
-    using dispatcherPtr = std::unique_ptr<Event::DispatcherImp>;
+    using dispatcherPtr = std::unique_ptr<Event::Dispatcher>;
     using threadPtr = std::unique_ptr<muduo::Thread>;
 public:
     explicit WorkerImpl(const std::function<void()>& cb, std::string name);
