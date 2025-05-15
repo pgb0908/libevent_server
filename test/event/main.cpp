@@ -14,8 +14,8 @@ DEFINE_string(gtest_filter, "", "");
 TEST(dispatcher_test, dispatcher_test_schedulableCallback01){
     int rtn = 0;
 
-    auto dispatcher = Event::DispatcherImp();
-    auto testCallback = dispatcher.createSchedulableCallback(
+    auto dispatcher = new Event::DispatcherImp();
+    auto testCallback = dispatcher->createSchedulableCallback(
             [&rtn]() {
                 std::cout << "hello" << std::endl;
                 rtn = 1;
@@ -32,9 +32,9 @@ TEST(dispatcher_test, dispatcher_test_schedulableCallback01){
             }
     );*/
 
-    event_base_dump_events(&dispatcher.base(), stdout);
-    dispatcher.dispatch_loop(Event::Dispatcher::RunType::Block);
-    dispatcher.exit();
+    event_base_dump_events(&dispatcher->base(), stdout);
+    dispatcher->dispatch_loop(Event::Dispatcher::RunType::Block);
+    dispatcher->exit();
 
     EXPECT_EQ(rtn, 1);
 }
