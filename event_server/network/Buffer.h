@@ -12,7 +12,7 @@
 #define MUDUO_NET_BUFFER_H
 
 #include "event_server/common/copyable.h"
-#include "StringPiece.h"
+#include "event_server/common/StringPiece.h"
 #include "event_server/common/Types.h"
 
 #include "Endian.h"

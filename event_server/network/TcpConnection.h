@@ -12,7 +12,7 @@
 #define MUDUO_NET_TCPCONNECTION_H
 
 #include "event_server/common/noncopyable.h"
-#include "StringPiece.h"
+#include "event_server/common/StringPiece.h"
 #include "event_server/common/Types.h"
 #include "Callbacks.h"
 #include "Buffer.h"
