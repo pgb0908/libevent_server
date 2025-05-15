@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "dispatcher.h"
+#include "Dispatcher.h"
 #include "deferred_deletable.h"
 
 namespace Event {

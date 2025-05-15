@@ -16,13 +16,16 @@
 namespace Event {
 
     Dispatcher::Dispatcher() :
+            name_(""),
             time_source_(RealTimeSystem()),
-            post_cb_(base_scheduler_.createSchedulableCallback([this]() {
-                LOG(INFO) << "create schedule callback";
-                runPostCallbacks();
-            })),
-            threadId_(muduo::CurrentThread::tid()) {
+            //scheduler_(time_system.createScheduler(base_scheduler_, base_scheduler_)),
+            threadId_(muduo::CurrentThread::tid()),
+            deferred_delete_cb_(base_scheduler_.createSchedulableCallback([this]() -> void { clearDeferredDeleteList(); })),
+            post_cb_(base_scheduler_.createSchedulableCallback([this]() {runPostCallbacks();})),
+            current_to_delete_(&to_delete_1_)
+         {
 
+        updateApproximateMonotonicTimeInternal();
         base_scheduler_.registerOnPrepareCallback(
                 std::bind(&Dispatcher::updateApproximateMonotonicTime, this));
 
@@ -184,7 +187,7 @@ namespace Event {
     void Dispatcher::deferredDelete(DeferredDeletablePtr &&to_delete) {
         //ASSERT(isThreadSafe());
         if (to_delete != nullptr) {
-            to_delete->deleteIsPending();
+            //to_delete->deleteIsPending();
             current_to_delete_->emplace_back(std::move(to_delete));
            // ENVOY_LOG(trace, "item added to deferred deletion list (size={})", current_to_delete_->size());
             if (current_to_delete_->size() == 1) {
