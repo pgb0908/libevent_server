@@ -2,7 +2,6 @@
 
 #include <functional>
 
-#include "dispatcher.h"
 #include "schedulable_cb.h"
 #include "timer.h"
 
@@ -12,6 +11,8 @@
 #include "event2/watch.h"
 
 namespace Event {
+
+    enum class RunType;
 
 // Implements Scheduler based on libevent.
 //
@@ -59,7 +60,7 @@ public:
   LibeventScheduler();
 
   // Scheduler
-  TimerPtr createTimer(const TimerCb& cb, Dispatcher& dispatcher) override;
+  TimerPtr createTimer(const TimerCb& cb, DispatcherImp& dispatcher) override;
   SchedulableCallbackPtr createSchedulableCallback(const std::function<void()>& cb) override;
 
   /**
@@ -67,7 +68,7 @@ public:
    *
    * @param mode The mode in which to run the event loop.
    */
-  void run(Dispatcher::RunType mode);
+  void run(RunType mode);
 
   /**
    * Exits the libevent loop.

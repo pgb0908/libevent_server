@@ -5,7 +5,6 @@
 
 #include "timer.h"
 
-#include "scope_tracker_impl.h"
 #include "event_impl_base.h"
 #include "libevent.h"
 
@@ -53,24 +52,19 @@ public:
  */
 class TimerImpl : public Timer, ImplBase {
 public:
-  TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Event::Dispatcher& dispatcher);
+  TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Event::DispatcherImp& dispatcher);
 
   // Timer
   void disableTimer() override;
 
-  void enableTimer(std::chrono::milliseconds d, const ScopeTrackedObject* scope) override;
-  void enableHRTimer(std::chrono::microseconds us, const ScopeTrackedObject* object) override;
 
   bool enabled() override;
 
 private:
-  void internalEnableTimer(const timeval& tv, const ScopeTrackedObject* scope);
+  void internalEnableTimer(const timeval& tv);
   TimerCb cb_;
-  Dispatcher& dispatcher_;
-  // This has to be atomic for alarms which are handled out of thread, for
-  // example if the DispatcherImpl::post is called by two threads, they race to
-  // both set this to null.
-  std::atomic<const ScopeTrackedObject*> object_{};
+  DispatcherImp& dispatcher_;
+
 };
 
 } // namespace Event

@@ -70,7 +70,7 @@ void TcpServer::start() {
             dispatcher_->printRegistEvent();
         });*/
 
-        dispatcher_->dispatch_loop(Event::Dispatcher::RunType::RunUntilExit);
+        dispatcher_->dispatch_loop(Event::RunType::RunUntilExit);
     }
 }
 

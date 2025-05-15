@@ -6,11 +6,10 @@
 
 #include "schedulable_cb.h"
 
-class ScopeTrackedObject;
 
 namespace Event {
 
-    class Dispatcher;
+    class DispatcherImp;
 
     /**
      * Callback invoked when a timer event fires.
@@ -31,25 +30,6 @@ namespace Event {
         virtual void disableTimer() = 0;
 
         /**
-         * Enable a pending timeout. If a timeout is already pending, it will be reset to the new timeout.
-         *
-         * @param ms supplies the duration of the alarm in milliseconds.
-         * @param object supplies an optional scope for the duration of the alarm.
-         */
-        virtual void enableTimer(std::chrono::milliseconds ms,
-                                 const ScopeTrackedObject *object = nullptr) = 0;
-
-        /**
-         * Enable a pending high resolution timeout. If a timeout is already pending, it will be reset to
-         * the new timeout.
-         *
-         * @param us supplies the duration of the alarm in microseconds.
-         * @param object supplies an optional scope for the duration of the alarm.
-         */
-        virtual void enableHRTimer(std::chrono::microseconds us,
-                                   const ScopeTrackedObject *object = nullptr) = 0;
-
-        /**
          * Return whether the timer is currently armed.
          */
         virtual bool enabled() = 0;
@@ -64,7 +44,7 @@ namespace Event {
         /**
          * Creates a timer.
          */
-        virtual TimerPtr createTimer(const TimerCb &cb, Dispatcher &dispatcher) = 0;
+        virtual TimerPtr createTimer(const TimerCb &cb, DispatcherImp &dispatcher) = 0;
     };
 
     using SchedulerPtr = std::unique_ptr<Scheduler>;

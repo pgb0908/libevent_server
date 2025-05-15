@@ -39,11 +39,7 @@ enum class FileTriggerType {
 // You can do this with bazel if you add the following build/test options
 // `--copt="-DFORCE_LEVEL_EVENTS"`
 constexpr FileTriggerType determinePlatformPreferredEventType() {
-#if defined(WIN32) || defined(FORCE_LEVEL_EVENTS)
-  return FileTriggerType::EmulatedEdge;
-#else
   return FileTriggerType::Edge;
-#endif
 }
 
 static constexpr FileTriggerType PlatformDefaultTriggerType = determinePlatformPreferredEventType();

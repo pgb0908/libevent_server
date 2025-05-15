@@ -5,6 +5,7 @@
 
 #include "event2/util.h"
 #include "cassert"
+#include "DispatcherImp.h"
 
 namespace Event {
 
@@ -24,7 +25,7 @@ LibeventScheduler::LibeventScheduler() {
   assert(Libevent::Global::initialized());
 }
 
-TimerPtr LibeventScheduler::createTimer(const TimerCb& cb, Dispatcher& dispatcher) {
+TimerPtr LibeventScheduler::createTimer(const TimerCb& cb, DispatcherImp& dispatcher) {
   return std::make_unique<TimerImpl>(libevent_, cb, dispatcher);
 };
 
@@ -33,16 +34,16 @@ LibeventScheduler::createSchedulableCallback(const std::function<void()>& cb) {
   return std::make_unique<SchedulableCallbackImpl>(libevent_, cb);
 };
 
-void LibeventScheduler::run(Dispatcher::RunType mode) {
+void LibeventScheduler::run(RunType mode) {
   int flag = 0;
   switch (mode) {
-  case Dispatcher::RunType::NonBlock:
+  case RunType::NonBlock:
     //flag = LibeventScheduler::flagsBasedOnEventType();
-  case Dispatcher::RunType::Block:
+  case RunType::Block:
     // The default flags have 'block' behavior. See
     // http://www.wangafu.net/~nickm/libevent-book/Ref3_eventloop.html
     break;
-  case Dispatcher::RunType::RunUntilExit:
+  case RunType::RunUntilExit:
     flag = EVLOOP_NO_EXIT_ON_EMPTY;
     break;
   }

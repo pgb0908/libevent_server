@@ -20,7 +20,7 @@ void WorkerImpl::threadRoutine(const std::function<void()> &cb) {
     dispatcherPtr_->post([this, cb]() {
         cb();
     });
-    dispatcherPtr_->dispatch_loop(Event::Dispatcher::RunType::Block);
+    dispatcherPtr_->dispatch_loop(Event::RunType::Block);
     LOG(INFO) <<"worker exited dispatch loop";
 
     //dispatcher_->shutdown();

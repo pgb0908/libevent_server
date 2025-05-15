@@ -31,7 +31,7 @@ namespace Event {
     }
 
 
-    void DispatcherImp::dispatch_loop(Dispatcher::RunType type) {
+    void DispatcherImp::dispatch_loop(RunType type) {
         LOG(INFO) << "loop start";
         base_scheduler_.run(type);
         //event_base_dispatch(&base_scheduler_.base());
@@ -80,7 +80,7 @@ namespace Event {
         }
     }
 
-    bool DispatcherImp::isThreadSafe() {
+    bool DispatcherImp::isThreadSafe() const {
         return threadId_ == muduo::CurrentThread::tid();
     }
 

@@ -57,7 +57,7 @@ void EventLoopThread::threadFunc()
     auto f = promiseForRun_.get_future(); // promiseForRun_에 값이 셋팅 되길 기다림
     (void)f.get();
     LOG(INFO) <<"worker before loop";
-    loop->dispatch_loop(Event::Dispatcher::RunType::RunUntilExit);
+    loop->dispatch_loop(Event::RunType::RunUntilExit);
     LOG(INFO) <<"worker exited dispatch loop";
     {
         std::unique_lock<std::mutex> lk(loopMutex_);
