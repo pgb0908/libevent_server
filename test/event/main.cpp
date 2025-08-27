@@ -6,6 +6,7 @@
 #include <event2/event.h>
 #include "event_server/event/Dispatcher.h"
 #include <gtest/gtest.h>
+#include <gflags/gflags.h>
 #include "event_server/event/deferred_task.h"
 #include "event_server/event/deferred_deletable.h"
 

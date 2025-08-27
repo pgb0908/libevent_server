@@ -5,6 +5,7 @@
 #include "event_server/thread/EventLoopThreadPool.h"
 #include "event_server/thread/WorkerImpl.h"
 #include <gtest/gtest.h>
+#include <gflags/gflags.h>
 
 DEFINE_string(gtest_color, "", "");
 DEFINE_string(gtest_filter, "", "");
