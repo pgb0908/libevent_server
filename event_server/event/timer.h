@@ -6,7 +6,6 @@
 
 #include "schedulable_cb.h"
 
-class ScopeTrackedObject;
 
 namespace Event {
 
@@ -29,25 +28,6 @@ namespace Event {
          * Disable a pending timeout without destroying the underlying timer.
          */
         virtual void disableTimer() = 0;
-
-        /**
-         * Enable a pending timeout. If a timeout is already pending, it will be reset to the new timeout.
-         *
-         * @param ms supplies the duration of the alarm in milliseconds.
-         * @param object supplies an optional scope for the duration of the alarm.
-         */
-        virtual void enableTimer(std::chrono::milliseconds ms,
-                                 const ScopeTrackedObject *object = nullptr) = 0;
-
-        /**
-         * Enable a pending high resolution timeout. If a timeout is already pending, it will be reset to
-         * the new timeout.
-         *
-         * @param us supplies the duration of the alarm in microseconds.
-         * @param object supplies an optional scope for the duration of the alarm.
-         */
-        virtual void enableHRTimer(std::chrono::microseconds us,
-                                   const ScopeTrackedObject *object = nullptr) = 0;
 
         /**
          * Return whether the timer is currently armed.

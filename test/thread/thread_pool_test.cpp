@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <event2/event.h>
-#include "event_server/event/DispatcherImp.h"
+#include "event_server/event/Dispatcher.h"
 #include "event_server/thread/EventLoopThreadPool.h"
 #include "event_server/thread/WorkerImpl.h"
 #include <gtest/gtest.h>

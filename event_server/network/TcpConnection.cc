@@ -34,7 +34,7 @@ void muduo::net::defaultMessageCallback(const TcpConnectionPtr &,
     buf->retrieveAll();
 }
 
-TcpConnection::TcpConnection(Event::DispatcherImp *dispatcher,
+TcpConnection::TcpConnection(Event::Dispatcher *dispatcher,
                              const string &nameArg,
                              int sockfd,
                              const InetAddress &localAddr,

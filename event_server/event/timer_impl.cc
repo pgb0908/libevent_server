@@ -2,6 +2,7 @@
 #include <chrono>
 #include "event2/event.h"
 #include "cassert"
+#include "Dispatcher.h"
 
 namespace Event {
 
@@ -12,38 +13,20 @@ TimerImpl::TimerImpl(Libevent::BasePtr& libevent, TimerCb cb, Dispatcher& dispat
       &raw_event_, libevent.get(),
       [](evutil_socket_t, short, void* arg) -> void {
         TimerImpl* timer = static_cast<TimerImpl*>(arg);
-        if (timer->object_ == nullptr) {
-          timer->cb_();
-          return;
-        }
-        ScopeTrackerScopeState scope(timer->object_, timer->dispatcher_);
-        timer->object_ = nullptr;
         timer->cb_();
       },
       this);
 }
 
 void TimerImpl::disableTimer() {
-  assert(dispatcher_.isThreadSafe());
+//  assert(dispatcher_.isThreadSafe());
   event_del(&raw_event_);
 }
 
-void TimerImpl::enableTimer(const std::chrono::milliseconds d, const ScopeTrackedObject* object) {
-  timeval tv;
-  TimerUtils::durationToTimeval(d, tv);
-  internalEnableTimer(tv, object);
-}
 
-void TimerImpl::enableHRTimer(const std::chrono::microseconds d,
-                              const ScopeTrackedObject* object = nullptr) {
-  timeval tv;
-  TimerUtils::durationToTimeval(d, tv);
-  internalEnableTimer(tv, object);
-}
 
-void TimerImpl::internalEnableTimer(const timeval& tv, const ScopeTrackedObject* object) {
+void TimerImpl::internalEnableTimer(const timeval& tv) {
   assert(dispatcher_.isThreadSafe());
-  object_ = object;
 
   event_add(&raw_event_, &tv);
 }

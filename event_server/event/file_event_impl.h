@@ -5,7 +5,7 @@
 #include "file_event.h"
 
 #include "event_impl_base.h"
-#include "DispatcherImp.h"
+#include "Dispatcher.h"
 #include "schedulable_cb.h"
 
 namespace Event {
@@ -17,7 +17,7 @@ namespace Event {
  */
     class FileEventImpl : public FileEvent, ImplBase {
     public:
-        FileEventImpl(DispatcherImp &dispatcher, int fd, FileReadyCb cb, FileTriggerType trigger,
+        FileEventImpl(Dispatcher &dispatcher, int fd, FileReadyCb cb, FileTriggerType trigger,
                       uint32_t events);
 
         // Event::FileEvent
@@ -31,7 +31,7 @@ namespace Event {
         void mergeInjectedEventsAndRunCb(uint32_t events);
         void updateEvents(uint32_t events);
 
-        DispatcherImp &dispatcher_;
+        Dispatcher &dispatcher_;
         FileReadyCb cb_;
         int fd_;
         FileTriggerType trigger_;

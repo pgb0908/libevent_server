@@ -49,25 +49,25 @@ void EventLoopThreadPool::wait() {
     started_ = false;
 }
 
-Event::DispatcherImp *EventLoopThreadPool::getNextLoop() {
+Event::Dispatcher *EventLoopThreadPool::getNextLoop() {
     if (loopThreadVector_.size() > 0)
     {
         size_t index = loopIndex_.fetch_add(1, std::memory_order_relaxed);
-        Event::DispatcherImp *loop =
+        Event::Dispatcher *loop =
                 loopThreadVector_[index % loopThreadVector_.size()]->getLoop();
         return loop;
     }
     return nullptr;
 }
 
-Event::DispatcherImp *EventLoopThreadPool::getLoop(size_t id) {
+Event::Dispatcher *EventLoopThreadPool::getLoop(size_t id) {
     if (id < loopThreadVector_.size())
         return loopThreadVector_[id]->getLoop();
     return nullptr;
 }
 
-std::vector<Event::DispatcherImp *> EventLoopThreadPool::getLoops() const {
-    std::vector<Event::DispatcherImp *> ret;
+std::vector<Event::Dispatcher *> EventLoopThreadPool::getLoops() const {
+    std::vector<Event::Dispatcher *> ret;
     for (auto &loopThread : loopThreadVector_)
     {
         ret.push_back(loopThread->getLoop());
