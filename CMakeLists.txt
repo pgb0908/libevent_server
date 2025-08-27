@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.24)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/conan_provider.cmake")
+set(CONAN_COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/conan/conan")
+
 project(libevent_server)
 
 find_package(Libevent REQUIRED)
@@ -20,7 +23,6 @@ set(event_server_lib
         event_server/common/CountDownLatch.cc
         event_server/common/Date.cc
         event_server/common/Exception.cc
-        event_server/common/Timestamp.cc
         event_server/common/TimeZone.cc
 
         event_server/event/Dispatcher.cpp
