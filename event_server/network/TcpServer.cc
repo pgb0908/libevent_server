@@ -66,9 +66,9 @@ void TcpServer::start() {
         assert(!acceptor_->listening());
         acceptor_->listen();
 
-/*        dispatcher_->post([this](){
-            dispatcher_->printRegistEvent();
-        });*/
+        dispatcher_->post([this](){
+            LOG(INFO) << "Loop in main....";
+        });
 
         dispatcher_->dispatch_loop(Event::Dispatcher::RunType::RunUntilExit);
     }
@@ -86,6 +86,10 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
               << "] - new connection [" << connName
               << "] from " << peerAddr.toIpPort();
     InetAddress localAddr(sockets::getLocalAddr(sockfd));
+
+    ioLoop->post([](){
+       // something
+    });
 
     TcpConnectionPtr conn(new TcpConnection(ioLoop,
                                             connName,

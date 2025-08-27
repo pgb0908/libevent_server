@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cassert>
+#include <glog/logging.h>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -100,7 +101,7 @@ void sockets::bindOrDie(int sockfd, const struct sockaddr* addr)
   int ret = ::bind(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
   if (ret < 0)
   {
-      std::cout  << "sockets::bindOrDie" << std::endl;
+      LOG(FATAL) << "sockets::bindOrDie" << std::endl;
   }
 }
 

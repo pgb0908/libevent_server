@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
 
     LOG(INFO) << "TCP server start";
     auto dispatcherImpl = Event::DispatcherImp();
-    muduo::net::InetAddress listenAddr("192.168.15.130",9990);
-    muduo::net::TcpServer tcpServer = muduo::net::TcpServer(&dispatcherImpl, listenAddr, "tcp-server", 1);
+    muduo::net::InetAddress listenAddr("127.0.0.1",9990);
+    muduo::net::TcpServer tcpServer = muduo::net::TcpServer(&dispatcherImpl, listenAddr, "tcp-server", 3);
     //tcpServer.setThreadNum(2);
     tcpServer.start();
 
